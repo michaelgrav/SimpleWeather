@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Current Weather</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+</head>
+<body class="d-flex justify-content-center">
+    <div id="weather">
+        <h1>Simple Forecast</h1>
+        <div id="description"></div>
+        <h1 id="temp"></h1>
+        <div id="location"></div>
+    </div>
+  <script>
+    function askBrowserForLocation() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(getCords);
+        } else {
+            console.error("Geolocation is not supported by this browser.");
+        }
+    }
+
+    function getCords(position) {
+        console.log("Latitude: " + position.coords.latitude +
+        "Longitude: " + position.coords.longitude)
+
+        getCurrentWeather(position.coords.latitude, position.coords.longitude)        
+    }
+
+    function getCurrentWeather(lat, lon) {
+        var key = '061cec208840636a12589da186d087bd';
+        
+        fetch('https://api.openweathermap.org/data/2.5/weather?lat=' + lat + '&lon=' + lon + '&appid=' + key)
+        .then(function(resp) { return resp.json()  }) // Convert response to json
+        .then(function(data) {
+            console.log(data);
+            insertWeather(data);
+        })
+        .catch(function() {
+            // Catch any errors
+        })
+    }
+
+    function insertWeather(d) {
+        var fahrenheit = Math.round(((parseFloat(d.main.temp) - 273.15) * 1.8) + 32); 
+        document.getElementById('description').innerHTML = d.weather[0].description;
+        document.getElementById('temp').innerHTML = fahrenheit + '&deg;';
+        document.getElementById('location').innerHTML = d.name;
+    }
+
+    window.onload = function() {
+        askBrowserForLocation();
+
+        //https://api.openweathermap.org/data/2.5/weather?lat=' + lat + '&lon=' + lon + '&appid=' + key
+    }
+  </script>
+</body>
+</html>
