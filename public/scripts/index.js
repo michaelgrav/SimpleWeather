@@ -78,6 +78,7 @@ function insertFutureWeather(data) {
         dateString = date.toDateString()
         time = formatAMPM(date)
 
+        var rainChance = (forecast.pop * 100).toFixed(0);
 
         const content = `
         <div class="card">
@@ -85,6 +86,7 @@ function insertFutureWeather(data) {
         <div class="card-body">
           <h5 class="card-title">${forecast.weather[0].main} (${forecast.weather[0].description})</h5>
           <p class="card-text">It will be ${fahrenheit}&deg; and feel like ${fahrenheitFeelLike}&deg;</p>
+          <p class="card-text">Chance of rain is ${rainChance}%</p>
         </div>
         </div>
           `;
