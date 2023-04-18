@@ -102,6 +102,13 @@ function insertFutureWeather(data) {
         dateString = date.toDateString()
         time = formatAMPM(date)
 
+        currDate = new Date()
+        currDateString = currDate.toDateString()
+        let dateText = ""
+
+        if(currDateString == dateString) dateText = "Today"
+        else dateText = dateString
+
         var rainChance = (forecast.pop * 100).toFixed(0);
 
         if (forecast.weather[0].id == 800) {
@@ -112,7 +119,7 @@ function insertFutureWeather(data) {
 
         const content = `
         <div class="card">
-        <h5 class="card-header text-light">${dateString} at ${time} ${emojiMap.get(emojiID)}</h5>
+        <h5 class="card-header text-light">${dateText} at ${time} ${emojiMap.get(emojiID)}</h5>
         <div class="card-body text-light">
           <h3 class="card-title text-light">It will be ${fahrenheitFeelLike}&deg;</h3>
           <p class="card-text text-light">Conditions: ${forecast.weather[0].main} (${forecast.weather[0].description})</p>
