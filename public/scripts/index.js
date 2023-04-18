@@ -44,7 +44,7 @@ function insertCurrentWeather(d) {
     const container = document.getElementById('currentWeatherContainer');
 
     const content = `
-            <div class="mt-2 p-4 bg-black text-white rounded">
+            <div class="mt-2 p-4 mainWeatherBackground text-white rounded">
                 <h1>It's currently ${fahrenheit}&deg; in ${d.name}</h1>
                 <br/>
                 <p>Current Conditions? ${d.weather[0].main}</p>
@@ -86,11 +86,11 @@ function insertFutureWeather(data) {
 
         const content = `
         <div class="card">
-        <h5 class="card-header">${dateString} at ${time}</h5>
-        <div class="card-body">
-          <h5 class="card-title">${forecast.weather[0].main} (${forecast.weather[0].description})</h5>
-          <p class="card-text">It will be ${fahrenheit}&deg; and feel like ${fahrenheitFeelLike}&deg;</p>
-          <p class="card-text">Chance of rain is ${rainChance}%</p>
+        <h5 class="card-header text-light">${dateString} at ${time}</h5>
+        <div class="card-body text-light">
+          <h5 class="card-title text-light">${forecast.weather[0].main} (${forecast.weather[0].description})</h5>
+          <p class="card-text text-light">It will be ${fahrenheit}&deg; and feel like ${fahrenheitFeelLike}&deg;</p>
+          <p class="card-text text-light">Chance of rain is ${rainChance}%</p>
         </div>
         </div>
         <br/>
