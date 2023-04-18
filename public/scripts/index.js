@@ -1,3 +1,5 @@
+var dataFromAPICall;
+
 
 function askBrowserForLocation() {
     if (navigator.geolocation) {
@@ -8,8 +10,18 @@ function askBrowserForLocation() {
 }
 
 function getCords(position) {
-    getCurrentWeather(position.coords.latitude, position.coords.longitude)  
-    getFutureWeather(position.coords.latitude, position.coords.longitude)      
+    var key = '061cec208840636a12589da186d087bd';
+    
+    fetch('https://api.openweathermap.org/data/3.0/onecall?lat=' + position.coords.latitude + '&lon=' + position.coords.longitude + '&appid=' + key)
+    .then(function(resp) { return resp.json()  }) // Convert response to json
+    .then(function(data) {
+        insertFutureWeather(data.hourly)
+    })
+    .catch(function() {
+        // Catch any errors
+    })
+
+    getCurrentWeather(position.coords.latitude, position.coords.longitude)      
 }
 
 // Current Weather
@@ -47,7 +59,7 @@ function getFutureWeather(lat, lon) {
     fetch('https://api.openweathermap.org/data/2.5/forecast?lat=' + lat + '&lon=' + lon + '&appid=' + key)
     .then(function(resp) { return resp.json()  }) // Convert response to json
     .then(function(data) {
-        console.log(data);
+        //console.log(data);
         insertFutureWeather(data);
     })
     .catch(function() {
@@ -58,25 +70,38 @@ function getFutureWeather(lat, lon) {
 function insertFutureWeather(data) {
     const container = document.getElementById('futureWeatherContainer');
 
-    data.list.forEach(forecast => {
-        //console.log(forecast)
-        var fahrenheit = Math.round(((parseFloat(forecast.main.temp) - 273.15) * 1.8) + 32);
+    data.forEach(forecast => {
+        var fahrenheit = Math.round(((parseFloat(forecast.temp) - 273.15) * 1.8) + 32);
+        var fahrenheitFeelLike = Math.round(((parseFloat(forecast.feels_like) - 273.15) * 1.8) + 32);
 
-        time = moment(forecast.dt_txt.split(" ")[1], 'HH:mm:ss').format('h:mm:ss A')
-        date = new Date(forecast.dt_txt).toDateString()
+        date = new Date(forecast.dt * 1000)
+        dateString = date.toDateString()
+        time = formatAMPM(date)
+
 
         const content = `
         <div class="card">
-        <h5 class="card-header">${date} at ${time}</h5>
+        <h5 class="card-header">${dateString} at ${time}</h5>
         <div class="card-body">
-          <h5 class="card-title">${forecast.weather[0].description}</h5>
-          <p class="card-text">It will be ${fahrenheit}&deg;</p>
+          <h5 class="card-title">${forecast.weather[0].main} (${forecast.weather[0].description})</h5>
+          <p class="card-text">It will be ${fahrenheit}&deg; and feel like ${fahrenheitFeelLike}&deg;</p>
         </div>
         </div>
           `;
     
         container.innerHTML += content;
     });
+}
+
+function formatAMPM(date) {
+    var hours = date.getHours();
+    var minutes = date.getMinutes();
+    var ampm = hours >= 12 ? 'pm' : 'am';
+    hours = hours % 12;
+    hours = hours ? hours : 12; // the hour '0' should be '12'
+    minutes = minutes < 10 ? '0'+minutes : minutes;
+    var strTime = hours + ':' + minutes + ' ' + ampm;
+    return strTime;
 }
 
 window.onload = function() {
