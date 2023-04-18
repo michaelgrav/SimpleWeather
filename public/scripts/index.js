@@ -44,8 +44,12 @@ function insertCurrentWeather(d) {
     const container = document.getElementById('currentWeatherContainer');
 
     const content = `
-            <div id="description">Current Conditions? ${d.weather[0].description}</div>
-            <div id="temp">It is currently ${fahrenheit}&deg; in ${d.name}</div>
+            <div class="mt-2 p-4 bg-black text-white rounded">
+                <h1>It's currently ${fahrenheit}&deg; in ${d.name}</h1>
+                <br/>
+                <p>Current Conditions? ${d.weather[0].main}</p>
+                <p>More specifically, ${d.weather[0].description}</p>
+            </div>
           `;
     
     container.innerHTML += content;
@@ -89,6 +93,7 @@ function insertFutureWeather(data) {
           <p class="card-text">Chance of rain is ${rainChance}%</p>
         </div>
         </div>
+        <br/>
           `;
     
         container.innerHTML += content;
