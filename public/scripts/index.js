@@ -1,4 +1,13 @@
 var dataFromAPICall;
+let emojiMap = new Map([
+    ["overcast clouds", String.fromCodePoint(0x2601)],
+    ["light rain", String.fromCodePoint(0x1F327)],
+    ["moderate rain", String.fromCodePoint(0x1F327)],
+    ["broken clouds", String.fromCodePoint(0x26C5)],
+    ["scattered clouds", String.fromCodePoint(0x26C5)],
+    ["few clouds", String.fromCodePoint(0x26C5)],
+    ["clear sky", String.fromCodePoint(0x2600)]
+]);
 
 
 function askBrowserForLocation() {
@@ -45,7 +54,7 @@ function insertCurrentWeather(d) {
 
     const content = `
             <div class="mt-2 p-4 mainWeatherBackground text-white rounded">
-                <h1>It's currently ${fahrenheit}&deg; in ${d.name}</h1>
+                <h1>It's currently ${fahrenheit}&deg; in ${d.name} ${emojiMap.get(d.weather[0].description)}</h1>
                 <br/>
                 <p>Current Conditions? ${d.weather[0].main}</p>
                 <p>More specifically, ${d.weather[0].description}</p>
@@ -75,7 +84,9 @@ function insertFutureWeather(data) {
     const container = document.getElementById('futureWeatherContainer');
 
     data.forEach(forecast => {
-        var fahrenheit = Math.round(((parseFloat(forecast.temp) - 273.15) * 1.8) + 32);
+        //console.log("in forecast")
+        // Actual current temp
+        //var fahrenheit = Math.round(((parseFloat(forecast.temp) - 273.15) * 1.8) + 32);
         var fahrenheitFeelLike = Math.round(((parseFloat(forecast.feels_like) - 273.15) * 1.8) + 32);
 
         date = new Date(forecast.dt * 1000)
@@ -86,10 +97,10 @@ function insertFutureWeather(data) {
 
         const content = `
         <div class="card">
-        <h5 class="card-header text-light">${dateString} at ${time}</h5>
+        <h5 class="card-header text-light">${dateString} at ${time} ${emojiMap.get(forecast.weather[0].description)}</h5>
         <div class="card-body text-light">
           <h5 class="card-title text-light">${forecast.weather[0].main} (${forecast.weather[0].description})</h5>
-          <p class="card-text text-light">It will be ${fahrenheit}&deg; and feel like ${fahrenheitFeelLike}&deg;</p>
+          <p class="card-text text-light">It will be ${fahrenheitFeelLike}&deg;</p>
           <p class="card-text text-light">Chance of rain is ${rainChance}%</p>
         </div>
         </div>
