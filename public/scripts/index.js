@@ -52,8 +52,6 @@ function insertCurrentWeather(d) {
     var fahrenheit = Math.round(((parseFloat(d.main.temp) - 273.15) * 1.8) + 32);
     const container = document.getElementById('currentWeatherContainer');
 
-    console.log(d);
-
     var windSpeedMeterPerSec = d.wind.speed;
     var windSpeedMilePerHour = Math.round(windSpeedMeterPerSec * 2.237)
 
@@ -64,7 +62,7 @@ function insertCurrentWeather(d) {
     }
 
     const content = `
-            <div class="mt-2 p-4 mainWeatherBackground text-white rounded">
+            <div class="mt-4 p-4 mainWeatherBackground text-white rounded">
                 <h1>It's currently ${fahrenheit}&deg; in ${d.name} ${emojiMap.get(emojiID)}</h1>
                 <br/>
                 <p>Current Conditions? ${d.weather[0].main}</p>
@@ -116,9 +114,9 @@ function insertFutureWeather(data) {
         <div class="card">
         <h5 class="card-header text-light">${dateString} at ${time} ${emojiMap.get(emojiID)}</h5>
         <div class="card-body text-light">
-          <h5 class="card-title text-light">${forecast.weather[0].main} (${forecast.weather[0].description})</h5>
-          <p class="card-text text-light">It will be ${fahrenheitFeelLike}&deg;</p>
-          <p class="card-text text-light">Chance of rain is ${rainChance}%</p>
+          <h3 class="card-title text-light">It will be ${fahrenheitFeelLike}&deg;</h3>
+          <p class="card-text text-light">Conditions: ${forecast.weather[0].main} (${forecast.weather[0].description})</p>
+          <h5 class="card-text text-light">Chance of rain is ${rainChance}%</h5>
         </div>
         </div>
         <br/>
