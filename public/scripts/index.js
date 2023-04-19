@@ -58,6 +58,9 @@ function insertCurrentWeather(d) {
     var windSpeedMilePerHour = Math.round(windSpeedMeterPerSec * 2.237)
     var windGustMilePerHour = Math.round(windGustMeterPerSec * 2.237)
 
+    var cloudCoverage = d.clouds.all;
+
+    console.log(d)
 
     var sunSetTime = formatAMPM(new Date(d.sys.sunset * 1000));
 
@@ -71,10 +74,10 @@ function insertCurrentWeather(d) {
             <div class="mt-4 p-4 mainWeatherBackground text-white rounded">
                 <h1>It's currently ${fahrenheit}&deg; in ${d.name} ${emojiMap.get(emojiID)}</h1>
                 <br/>
-                <p>Current Conditions? ${d.weather[0].main}</p>
-                <p>More specifically, ${d.weather[0].description}</p>
-                <p>The sun set(s) at ${sunSetTime}</p>
-                <p>Current wind speed is ${windSpeedMilePerHour}MPH with gusts up to ${windGustMilePerHour}MPH</p>
+                <p>☂️ Current Conditions? ${d.weather[0].main} (more specifically, ${d.weather[0].description})</p>
+                <p>🌅 The sun set(s) at ${sunSetTime}</p>
+                <p>🍃 Current wind speed is ${windSpeedMilePerHour}MPH with gusts up to ${windGustMilePerHour}MPH</p>
+                <p>☁️ Cloud coverage is ${cloudCoverage}%</p>
             </div>
           `;
     
