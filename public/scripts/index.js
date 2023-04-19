@@ -176,14 +176,14 @@ function firstDigit(num) {
 function updateNavbarText(lat, lon) {
     const container = document.getElementById('navbarForLocationDisplay');
 
-    fetch('http://api.openweathermap.org/geo/1.0/reverse?lat=' + lat + '&lon=' + lon + '&appid=' + key)
+    fetch('https://api.openweathermap.org/geo/1.0/reverse?lat=' + lat + '&lon=' + lon + '&appid=' + key)
     .then(function(resp) { return resp.json()  }) // Convert response to json
     .then(function(data) {
         content = "Weather forecast for " + data[0].name + ", " + data[0].state;
         container.innerHTML += content;
     })
     .catch(function() {
-        // Catch any errors
+        console.error("error getting the user's location for the navbar text")
     })
 }
 
