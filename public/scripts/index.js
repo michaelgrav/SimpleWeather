@@ -60,6 +60,11 @@ function insertCurrentWeather(d) {
 
     var cloudCoverage = d.clouds.all;
 
+    var mainWeatherConditions = d.weather[0].main;
+    var detailedWeatherConditions = d.weather[0].description
+    if (mainWeatherConditions == "Clear") mainWeatherConditions = "☂️ Current Conditions: " + "Clear skies ahead!";
+    else mainWeatherConditions = "☂️ Current Conditions: " + mainWeatherConditions + " (more specifically, " + detailedWeatherConditions + ")"
+
     console.log(d)
 
     var sunSetTime = formatAMPM(new Date(d.sys.sunset * 1000));
@@ -74,7 +79,7 @@ function insertCurrentWeather(d) {
             <div class="mt-4 p-4 mainWeatherBackground text-white rounded">
                 <h1>It's currently ${fahrenheit}&deg; in ${d.name} ${emojiMap.get(emojiID)}</h1>
                 <br/>
-                <p>☂️ Current Conditions? ${d.weather[0].main} (more specifically, ${d.weather[0].description})</p>
+                <p>${mainWeatherConditions}</p>
                 <p>🌅 The sun set(s) at ${sunSetTime}</p>
                 <p>🍃 Current wind speed is ${windSpeedMilePerHour}MPH with gusts up to ${windGustMilePerHour}MPH</p>
                 <p>☁️ Cloud coverage is ${cloudCoverage}%</p>
