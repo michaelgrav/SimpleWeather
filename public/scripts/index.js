@@ -8,6 +8,8 @@ let emojiMap = new Map([
     [6, String.fromCodePoint(0x1F328)],
     [2, String.fromCodePoint(0x26C8)]
 ]);
+var key = '061cec208840636a12589da186d087bd';
+
 
 
 function askBrowserForLocation() {
@@ -19,8 +21,10 @@ function askBrowserForLocation() {
 }
 
 function getCords(position) {
-    var key = '061cec208840636a12589da186d087bd';
+    getCurrentWeather(position.coords.latitude, position.coords.longitude) 
+    updateNavbarText(position.coords.latitude, position.coords.longitude)   
     
+    // Load the future forecast last
     fetch('https://api.openweathermap.org/data/3.0/onecall?lat=' + position.coords.latitude + '&lon=' + position.coords.longitude + '&appid=' + key)
     .then(function(resp) { return resp.json()  }) // Convert response to json
     .then(function(data) {
@@ -28,15 +32,11 @@ function getCords(position) {
     })
     .catch(function() {
         // Catch any errors
-    })
-
-    getCurrentWeather(position.coords.latitude, position.coords.longitude)      
+    })  
 }
 
 // Current Weather
 function getCurrentWeather(lat, lon) {
-    var key = '061cec208840636a12589da186d087bd';
-    
     fetch('https://api.openweathermap.org/data/2.5/weather?lat=' + lat + '&lon=' + lon + '&appid=' + key)
     .then(function(resp) { return resp.json()  }) // Convert response to json
     .then(function(data) {
@@ -53,7 +53,11 @@ function insertCurrentWeather(d) {
     const container = document.getElementById('currentWeatherContainer');
 
     var windSpeedMeterPerSec = d.wind.speed;
+    var windGustMeterPerSec = d.wind.gust;
+
     var windSpeedMilePerHour = Math.round(windSpeedMeterPerSec * 2.237)
+    var windGustMilePerHour = Math.round(windGustMeterPerSec * 2.237)
+
 
     var sunSetTime = formatAMPM(new Date(d.sys.sunset * 1000));
 
@@ -70,7 +74,7 @@ function insertCurrentWeather(d) {
                 <p>Current Conditions? ${d.weather[0].main}</p>
                 <p>More specifically, ${d.weather[0].description}</p>
                 <p>The sun set(s) at ${sunSetTime}</p>
-                <p>Current wind speed is ${windSpeedMilePerHour}MPH</p>
+                <p>Current wind speed is ${windSpeedMilePerHour}MPH with gusts up to ${windGustMilePerHour}MPH</p>
             </div>
           `;
     
@@ -167,6 +171,20 @@ function firstDigit(num) {
     const digit = Number(matches[0]);
     // 3: add sign back as needed
     return (num < 0) ? -digit : digit;
+}
+
+function updateNavbarText(lat, lon) {
+    const container = document.getElementById('navbarForLocationDisplay');
+
+    fetch('http://api.openweathermap.org/geo/1.0/reverse?lat=' + lat + '&lon=' + lon + '&appid=' + key)
+    .then(function(resp) { return resp.json()  }) // Convert response to json
+    .then(function(data) {
+        content = "Weather forecast for " + data[0].name + ", " + data[0].state;
+        container.innerHTML += content;
+    })
+    .catch(function() {
+        // Catch any errors
+    })
 }
 
 window.onload = function() {
