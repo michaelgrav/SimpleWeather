@@ -55,6 +55,8 @@ function insertCurrentWeather(d) {
     var windSpeedMeterPerSec = d.wind.speed;
     var windSpeedMilePerHour = Math.round(windSpeedMeterPerSec * 2.237)
 
+    var sunSetTime = formatAMPM(new Date(d.sys.sunset * 1000));
+
     if (d.weather[0].id == 800) {
         emojiID = 800;
     } else {
@@ -67,6 +69,7 @@ function insertCurrentWeather(d) {
                 <br/>
                 <p>Current Conditions? ${d.weather[0].main}</p>
                 <p>More specifically, ${d.weather[0].description}</p>
+                <p>The sun set(s) at ${sunSetTime}</p>
                 <p>Current wind speed is ${windSpeedMilePerHour}MPH</p>
             </div>
           `;
@@ -106,8 +109,22 @@ function insertFutureWeather(data) {
         currDateString = currDate.toDateString()
         let dateText = ""
 
+        const tomorrow = new Date(new Date().getTime() + (24 * 60 * 60 * 1000));
+
         if(currDateString == dateString) dateText = "Today"
+        else if (tomorrow.toDateString() == dateString) dateText = "Tomorrow"
         else dateText = dateString
+
+        /* capitalize first letter of detailed forecast text
+        detailedForecastText =  forecast.weather[0].description.toLowerCase()
+        .split(' ')
+        .map((s) => s.charAt(0).toUpperCase() + s.substring(1))
+        .join(' ');
+        */
+
+        detailedForecastText = "";
+        if (forecast.weather[0].description == "clear sky") detailedForecastText = "a clear sky"
+        else detailedForecastText = forecast.weather[0].description
 
         var rainChance = (forecast.pop * 100).toFixed(0);
 
@@ -121,8 +138,7 @@ function insertFutureWeather(data) {
         <div class="card">
         <h5 class="card-header text-light">${dateText} at ${time} ${emojiMap.get(emojiID)}</h5>
         <div class="card-body text-light">
-          <h3 class="card-title text-light">It will be ${fahrenheitFeelLike}&deg;</h3>
-          <p class="card-text text-light">Conditions: ${forecast.weather[0].main} (${forecast.weather[0].description})</p>
+          <h3 class="card-title text-light">It will be ${fahrenheitFeelLike}&deg; with ${detailedForecastText}</h3>         
           <h5 class="card-text text-light">Chance of rain is ${rainChance}%</h5>
         </div>
         </div>
