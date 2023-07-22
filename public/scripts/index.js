@@ -32,7 +32,7 @@ function getCords(position) {
     fetch('https://api.openweathermap.org/data/3.0/onecall?lat=' + position.coords.latitude + '&lon=' + position.coords.longitude + '&appid=' + key)
     .then(function(resp) { return resp.json()  }) // Convert response to json
     .then(function(data) {
-        console.log(data);
+        //console.log(data);
         insertCurrentWeather(data.current)
         insertFutureWeather(data.hourly);
     })
