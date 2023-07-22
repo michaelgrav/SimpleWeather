@@ -90,7 +90,7 @@ function insertFutureWeather(data) {
 
     data.forEach(forecast => {
         // Actual current temp
-        //var fahrenheit = Math.round(((parseFloat(forecast.temp) - 273.15) * 1.8) + 32);
+        var fahrenheit = Math.round(((parseFloat(forecast.temp) - 273.15) * 1.8) + 32);
         var fahrenheitFeelLike = Math.round(((parseFloat(forecast.feels_like) - 273.15) * 1.8) + 32);
 
         date = new Date(forecast.dt * 1000)
@@ -130,7 +130,7 @@ function insertFutureWeather(data) {
         <div class="card">
         <h5 class="card-header text-dark">${dateText} at ${time} ${emojiMap.get(emojiID)}</h5>
         <div class="card-body text-dark">
-          <h3 class="card-title text-dark">It will be ${fahrenheitFeelLike}&deg; with ${detailedForecastText}</h3>         
+          <h3 class="card-title text-dark">It will be ${fahrenheit}&deg; with ${detailedForecastText}</h3>         
           <h5 class="card-text text-dark">Chance of rain is ${rainChance}%</h5>
         </div>
         </div>
