@@ -69,7 +69,7 @@ function insertCurrentWeather(d) {
     }
 
     const content = `
-            <div class="mt-4 p-4 mainWeatherBackground text-black rounded">
+            <div class="mt-4 p-4 mainWeatherBackground text-black rounded border">
                 <h1>It's currently ${fahrenheit}&deg; in ${city} ${emojiMap.get(emojiID)}</h1>
                 <br/>
                 <p>${mainWeatherConditions}</p>
