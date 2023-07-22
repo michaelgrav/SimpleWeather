@@ -42,7 +42,6 @@ function getCords(position) {
     })  
 }
 
-
 function insertCurrentWeather(d) {
     const container = document.getElementById('currentWeatherContainer');
 
