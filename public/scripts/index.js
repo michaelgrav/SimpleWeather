@@ -1,4 +1,3 @@
-var dataFromAPICall;
 let emojiMap = new Map([
     [8, String.fromCodePoint(0x2601)],
     [5, String.fromCodePoint(0x1F327)],
@@ -8,7 +7,7 @@ let emojiMap = new Map([
     [6, String.fromCodePoint(0x1F328)],
     [2, String.fromCodePoint(0x26C8)]
 ]);
-var key = '061cec208840636a12589da186d087bd';
+const key = '061cec208840636a12589da186d087bd';
 var city = ''
 var state = ''
 
