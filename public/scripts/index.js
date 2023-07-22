@@ -32,7 +32,7 @@ function getCords(position) {
     fetch('https://api.openweathermap.org/data/3.0/onecall?lat=' + position.coords.latitude + '&lon=' + position.coords.longitude + '&appid=' + key)
     .then(function(resp) { return resp.json()  }) // Convert response to json
     .then(function(data) {
-        //console.log(data);
+        console.log(data);
         insertCurrentWeather(data.current)
         insertFutureWeather(data.hourly);
     })
@@ -129,7 +129,7 @@ function insertFutureWeather(data) {
             if(!dayEnteries.has(dateText)) {
                 var tomorrowHeadingText = `
                 <hr/>
-                <h1 class="text-dark p-1 mb-3"><center>${dateText}</center></h1>
+                <h1 class="text-dark p-1 mb-4"><center>${dateText}</center></h1>
                 `;
 
                 container.innerHTML += tomorrowHeadingText;
@@ -154,7 +154,8 @@ function insertFutureWeather(data) {
             <h5 class="card-header text-dark">${dateText} at ${time} ${emojiMap.get(emojiID)}</h5>
             <div class="card-body text-dark">
             <h3 class="card-title text-dark">It will be ${fahrenheit}&deg; with ${detailedForecastText}</h3>         
-            <h5 class="card-text text-dark">Chance of rain is ${rainChance}%</h5>
+            <p class="card-text text-dark" style="margin-bottom:0;">Chance of rain is ${rainChance}%</p>
+            <p class="card-text text-dark" style="margin:0; padding-top:0;">Cloud coverage will be ${forecast.clouds}%</p>
             </div>
             </div>
             <br/>
