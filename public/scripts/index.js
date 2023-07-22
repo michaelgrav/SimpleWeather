@@ -32,7 +32,7 @@ function getCords(position) {
     fetch('https://api.openweathermap.org/data/3.0/onecall?lat=' + position.coords.latitude + '&lon=' + position.coords.longitude + '&appid=' + key)
     .then(function(resp) { return resp.json()  }) // Convert response to json
     .then(function(data) {
-        console.log(data);
+        //console.log(data);
         insertCurrentWeather(data.current)
         insertFutureWeather(data.hourly);
     })
@@ -44,8 +44,10 @@ function getCords(position) {
 
 
 function insertCurrentWeather(d) {
-    var fahrenheit = Math.round(((parseFloat(d.temp) - 273.15) * 1.8) + 32);
     const container = document.getElementById('currentWeatherContainer');
+
+    var current_fahrenheit = Math.round(((parseFloat(d.temp) - 273.15) * 1.8) + 32);
+    var feels_like_fahrenheit = Math.round(((parseFloat(d.feels_like) - 273.15) * 1.8) + 32);
 
     var windSpeedMeterPerSec = d.wind_speed;
     var windGustMeterPerSec = d.wind_gust;
@@ -69,13 +71,14 @@ function insertCurrentWeather(d) {
     }
 
     const content = `
-            <div class="mt-4 p-4 mainWeatherBackground text-black rounded">
-                <h1>It's currently ${fahrenheit}&deg; in ${city} ${emojiMap.get(emojiID)}</h1>
+            <div class="mt-4 p-3 mainWeatherBackground text-black rounded border">
+                <h1>It's currently ${current_fahrenheit}&deg; in ${city} ${emojiMap.get(emojiID)}</h1>
                 <br/>
                 <p>${mainWeatherConditions}</p>
-                <p>🌅 The sun set(s) at ${sunSetTime}</p>
+                <p>🌡️ It currently feels like ${feels_like_fahrenheit}&deg;</p>
                 <p>🍃 Current wind speed is ${windSpeedMilePerHour}MPH with gusts up to ${windGustMilePerHour}MPH</p>
                 <p>☁️ Cloud coverage is ${cloudCoverage}%</p>
+                <p>🌅 The sun set(s) at ${sunSetTime}</p>
             </div>
           `;
     
@@ -85,10 +88,12 @@ function insertCurrentWeather(d) {
 function insertFutureWeather(data) {
     const container = document.getElementById('futureWeatherContainer');
 
+    var dayEnteries = new Set();
+
     data.forEach(forecast => {
         // Actual current temp
-        //var fahrenheit = Math.round(((parseFloat(forecast.temp) - 273.15) * 1.8) + 32);
-        var fahrenheitFeelLike = Math.round(((parseFloat(forecast.feels_like) - 273.15) * 1.8) + 32);
+        var fahrenheit = Math.round(((parseFloat(forecast.temp) - 273.15) * 1.8) + 32);
+        //var fahrenheitFeelLike = Math.round(((parseFloat(forecast.feels_like) - 273.15) * 1.8) + 32);
 
         date = new Date(forecast.dt * 1000)
         dateString = date.toDateString()
@@ -100,16 +105,37 @@ function insertFutureWeather(data) {
 
         const tomorrow = new Date(new Date().getTime() + (24 * 60 * 60 * 1000));
 
+        // Date is today
         if(currDateString == dateString) dateText = "Today"
-        else if (tomorrow.toDateString() == dateString) dateText = "Tomorrow"
-        else dateText = dateString
 
-        /* capitalize first letter of detailed forecast text
-        detailedForecastText =  forecast.weather[0].description.toLowerCase()
-        .split(' ')
-        .map((s) => s.charAt(0).toUpperCase() + s.substring(1))
-        .join(' ');
-        */
+        // Date is tomorrow
+        else if (tomorrow.toDateString() == dateString) {
+            dateText = "Tomorrow"
+
+            if(!dayEnteries.has(dateText)) {
+                var tomorrowHeadingText = `
+                <hr/>
+                <h1 class="text-dark p-1 mb-3"><center>${dateText} (${dateString})</center></h1>
+                `;
+
+                container.innerHTML += tomorrowHeadingText;
+                dayEnteries.add(dateText)
+            }
+        }
+
+        // Date is sometime past tomorrow
+        else {
+            dateText = dateString
+            if(!dayEnteries.has(dateText)) {
+                var tomorrowHeadingText = `
+                <hr/>
+                <h1 class="text-dark p-1 mb-3"><center>${dateText}</center></h1>
+                `;
+
+                container.innerHTML += tomorrowHeadingText;
+                dayEnteries.add(dateText)
+            }
+        }
 
         detailedForecastText = "";
         if (forecast.weather[0].description == "clear sky") detailedForecastText = "a clear sky"
@@ -124,14 +150,14 @@ function insertFutureWeather(data) {
         }
 
         const content = `
-        <div class="card">
-        <h5 class="card-header text-dark">${dateText} at ${time} ${emojiMap.get(emojiID)}</h5>
-        <div class="card-body text-dark">
-          <h3 class="card-title text-dark">It will be ${fahrenheitFeelLike}&deg; with ${detailedForecastText}</h3>         
-          <h5 class="card-text text-dark">Chance of rain is ${rainChance}%</h5>
-        </div>
-        </div>
-        <br/>
+            <div class="card">
+            <h5 class="card-header text-dark">${dateText} at ${time} ${emojiMap.get(emojiID)}</h5>
+            <div class="card-body text-dark">
+            <h3 class="card-title text-dark">It will be ${fahrenheit}&deg; with ${detailedForecastText}</h3>         
+            <h5 class="card-text text-dark">Chance of rain is ${rainChance}%</h5>
+            </div>
+            </div>
+            <br/>
           `;
     
         container.innerHTML += content;
