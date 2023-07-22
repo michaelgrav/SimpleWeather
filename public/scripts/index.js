@@ -44,8 +44,10 @@ function getCords(position) {
 
 
 function insertCurrentWeather(d) {
-    var fahrenheit = Math.round(((parseFloat(d.temp) - 273.15) * 1.8) + 32);
     const container = document.getElementById('currentWeatherContainer');
+
+    var current_fahrenheit = Math.round(((parseFloat(d.temp) - 273.15) * 1.8) + 32);
+    var feels_like_fahrenheit = Math.round(((parseFloat(d.feels_like) - 273.15) * 1.8) + 32);
 
     var windSpeedMeterPerSec = d.wind_speed;
     var windGustMeterPerSec = d.wind_gust;
@@ -70,10 +72,11 @@ function insertCurrentWeather(d) {
 
     const content = `
             <div class="mt-4 p-4 mainWeatherBackground text-black rounded border">
-                <h1>It's currently ${fahrenheit}&deg; in ${city} ${emojiMap.get(emojiID)}</h1>
+                <h1>It's currently ${current_fahrenheit}&deg; in ${city} ${emojiMap.get(emojiID)}</h1>
                 <br/>
                 <p>${mainWeatherConditions}</p>
                 <p>🌅 The sun set(s) at ${sunSetTime}</p>
+                <p>🌡️ It currently feels like ${feels_like_fahrenheit}&deg;</p>
                 <p>🍃 Current wind speed is ${windSpeedMilePerHour}MPH with gusts up to ${windGustMilePerHour}MPH</p>
                 <p>☁️ Cloud coverage is ${cloudCoverage}%</p>
             </div>
