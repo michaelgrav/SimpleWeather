@@ -9,7 +9,8 @@ let emojiMap = new Map([
     [2, String.fromCodePoint(0x26C8)]
 ]);
 var key = '061cec208840636a12589da186d087bd';
-
+var city = ''
+var state = ''
 
 
 function askBrowserForLocation() {
@@ -20,54 +21,46 @@ function askBrowserForLocation() {
     }
 }
 
+/*
+    Main function that calls the other functions
+    update navbar > get current weather > get future weather
+*/
 function getCords(position) {
-    getCurrentWeather(position.coords.latitude, position.coords.longitude) 
     updateNavbarText(position.coords.latitude, position.coords.longitude)   
     
     // Load the future forecast last
     fetch('https://api.openweathermap.org/data/3.0/onecall?lat=' + position.coords.latitude + '&lon=' + position.coords.longitude + '&appid=' + key)
     .then(function(resp) { return resp.json()  }) // Convert response to json
     .then(function(data) {
-        insertFutureWeather(data.hourly)
+        console.log(data);
+        insertCurrentWeather(data.current)
+        insertFutureWeather(data.hourly);
     })
     .catch(function() {
         // Catch any errors
+        console.error("Error calling the weather API");
     })  
 }
 
-// Current Weather
-function getCurrentWeather(lat, lon) {
-    fetch('https://api.openweathermap.org/data/2.5/weather?lat=' + lat + '&lon=' + lon + '&appid=' + key)
-    .then(function(resp) { return resp.json()  }) // Convert response to json
-    .then(function(data) {
-        //console.log(data);
-        insertCurrentWeather(data);
-    })
-    .catch(function() {
-        // Catch any errors
-    })
-}
 
 function insertCurrentWeather(d) {
-    var fahrenheit = Math.round(((parseFloat(d.main.temp) - 273.15) * 1.8) + 32);
+    var fahrenheit = Math.round(((parseFloat(d.temp) - 273.15) * 1.8) + 32);
     const container = document.getElementById('currentWeatherContainer');
 
-    var windSpeedMeterPerSec = d.wind.speed;
-    var windGustMeterPerSec = d.wind.gust;
+    var windSpeedMeterPerSec = d.wind_speed;
+    var windGustMeterPerSec = d.wind_gust;
 
     var windSpeedMilePerHour = Math.round(windSpeedMeterPerSec * 2.237)
     var windGustMilePerHour = Math.round(windGustMeterPerSec * 2.237)
 
-    var cloudCoverage = d.clouds.all;
+    var cloudCoverage = d.clouds;
 
     var mainWeatherConditions = d.weather[0].main;
     var detailedWeatherConditions = d.weather[0].description
     if (mainWeatherConditions == "Clear") mainWeatherConditions = "☂️ Current Conditions: " + "Clear skies ahead!";
     else mainWeatherConditions = "☂️ Current Conditions: " + mainWeatherConditions + " (more specifically, " + detailedWeatherConditions + ")"
 
-    console.log(d)
-
-    var sunSetTime = formatAMPM(new Date(d.sys.sunset * 1000));
+    var sunSetTime = formatAMPM(new Date(d.sunset * 1000));
 
     if (d.weather[0].id == 800) {
         emojiID = 800;
@@ -77,7 +70,7 @@ function insertCurrentWeather(d) {
 
     const content = `
             <div class="mt-4 p-4 mainWeatherBackground text-black rounded">
-                <h1>It's currently ${fahrenheit}&deg; in ${d.name} ${emojiMap.get(emojiID)}</h1>
+                <h1>It's currently ${fahrenheit}&deg; in ${city} ${emojiMap.get(emojiID)}</h1>
                 <br/>
                 <p>${mainWeatherConditions}</p>
                 <p>🌅 The sun set(s) at ${sunSetTime}</p>
@@ -88,7 +81,6 @@ function insertCurrentWeather(d) {
     
     container.innerHTML += content;
 }
-
 
 function insertFutureWeather(data) {
     const container = document.getElementById('futureWeatherContainer');
@@ -173,6 +165,8 @@ function updateNavbarText(lat, lon) {
     .then(function(resp) { return resp.json()  }) // Convert response to json
     .then(function(data) {
         content = "Weather forecast for " + data[0].name + ", " + data[0].state;
+        city = data[0].name;
+        state = data[0].state;
         container.innerHTML += content;
     })
     .catch(function() {
