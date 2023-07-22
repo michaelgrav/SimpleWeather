@@ -90,21 +90,6 @@ function insertCurrentWeather(d) {
 }
 
 
-// Future Weather
-function getFutureWeather(lat, lon) {
-    var key = '061cec208840636a12589da186d087bd';
-    
-    fetch('https://api.openweathermap.org/data/2.5/forecast?lat=' + lat + '&lon=' + lon + '&appid=' + key)
-    .then(function(resp) { return resp.json()  }) // Convert response to json
-    .then(function(data) {
-        //console.log(data);
-        insertFutureWeather(data);
-    })
-    .catch(function() {
-        // Catch any errors
-    })
-}
-
 function insertFutureWeather(data) {
     const container = document.getElementById('futureWeatherContainer');
 
