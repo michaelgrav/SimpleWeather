@@ -27,8 +27,10 @@ function askBrowserForLocation() {
 function getCords(position) {
     updateNavbarText(position.coords.latitude, position.coords.longitude)   
     
+    var excludedAPIFields = "minutely,daily";
+
     // Load the future forecast last
-    fetch('https://api.openweathermap.org/data/3.0/onecall?lat=' + position.coords.latitude + '&lon=' + position.coords.longitude + '&appid=' + key)
+    fetch('https://api.openweathermap.org/data/3.0/onecall?lat=' + position.coords.latitude + '&lon=' + position.coords.longitude + '&exclude=' + excludedAPIFields + '&appid=' + key)
     .then(function(resp) { return resp.json()  }) // Convert response to json
     .then(function(data) {
         console.log(data);
@@ -41,31 +43,35 @@ function getCords(position) {
     })  
 }
 
-function insertCurrentWeather(d) {
+function insertWeatherAlerts(data) {
+
+}
+
+function insertCurrentWeather(data) {
     const container = document.getElementById('currentWeatherContainer');
 
-    var current_fahrenheit = Math.round(((parseFloat(d.temp) - 273.15) * 1.8) + 32);
-    var feels_like_fahrenheit = Math.round(((parseFloat(d.feels_like) - 273.15) * 1.8) + 32);
+    var current_fahrenheit = Math.round(((parseFloat(data.temp) - 273.15) * 1.8) + 32);
+    var feels_like_fahrenheit = Math.round(((parseFloat(data.feels_like) - 273.15) * 1.8) + 32);
 
-    var windSpeedMeterPerSec = d.wind_speed;
-    var windGustMeterPerSec = d.wind_gust;
+    var windSpeedMeterPerSec = data.wind_speed;
+    var windGustMeterPerSec = data.wind_gust;
 
     var windSpeedMilePerHour = Math.round(windSpeedMeterPerSec * 2.237)
     var windGustMilePerHour = Math.round(windGustMeterPerSec * 2.237)
 
-    var cloudCoverage = d.clouds;
+    var cloudCoverage = data.clouds;
 
-    var mainWeatherConditions = d.weather[0].main;
-    var detailedWeatherConditions = d.weather[0].description
+    var mainWeatherConditions = data.weather[0].main;
+    var detailedWeatherConditions = data.weather[0].description
     if (mainWeatherConditions == "Clear") mainWeatherConditions = "☂️ Current Conditions: " + "Clear skies ahead!";
     else mainWeatherConditions = "☂️ Current Conditions: " + mainWeatherConditions + " (more specifically, " + detailedWeatherConditions + ")"
 
-    var sunSetTime = formatAMPM(new Date(d.sunset * 1000));
+    var sunSetTime = formatAMPM(new Date(data.sunset * 1000));
 
-    if (d.weather[0].id == 800) {
+    if (data.weather[0].id == 800) {
         emojiID = 800;
     } else {
-        var emojiID = firstDigit(d.weather[0].id);
+        var emojiID = firstDigit(data.weather[0].id);
     }
 
     const content = `
