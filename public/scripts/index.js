@@ -119,11 +119,29 @@ function insertCurrentWeather(data) {
     container.innerHTML += content;
 }
 
+function createFutureWeatherContainers(data) {
+    const mainContainer = document.getElementById('futureWeatherContainer');
+
+    console.log(data);
+
+    data.forEach(forecast => {
+        var date = new Date(forecast.dt * 1000);
+        var dateString = date.toDateString();
+        const content = `
+            <div id="${dateString}"></div>
+          `;
+    
+        mainContainer.innerHTML += content;
+    });
+}
+
 function insertFutureWeather(data, dataDaily) {
-    const container = document.getElementById('futureWeatherContainer');
+    createFutureWeatherContainers(dataDaily);
+
     var dayEnteries = new Set();
 
     data.forEach(forecast => {
+
         // Actual current temp
         var fahrenheit = Math.round(((parseFloat(forecast.temp) - 273.15) * 1.8) + 32);
         //var fahrenheitFeelLike = Math.round(((parseFloat(forecast.feels_like) - 273.15) * 1.8) + 32);
@@ -137,6 +155,8 @@ function insertFutureWeather(data, dataDaily) {
         let dateText = "";
 
         const tomorrow = new Date(new Date().getTime() + (24 * 60 * 60 * 1000));
+
+        const container = document.getElementById(dateString);
 
         // Date is today
         if(currDateString == dateString) {
@@ -214,6 +234,7 @@ function insertFutureWeather(data, dataDaily) {
     dataDaily.forEach(dayEntry => {
         var dayDate = new Date(dayEntry.dt * 1000).toDateString();
         if(!dayEnteries.has(dayDate)) {
+            const container = document.getElementById(dayDate);
             var daySummary = futureWeatherCard(dayEntry, dayDate)
             container.innerHTML += daySummary;
         }
