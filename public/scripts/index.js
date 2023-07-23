@@ -1,3 +1,5 @@
+//import {searchLat, searchLon} from "./searchlocation.js"
+
 let emojiMap = new Map([
     [8, String.fromCodePoint(0x2601)],
     [5, String.fromCodePoint(0x1F327)],
@@ -15,8 +17,22 @@ var state = ''
 
 
 function askBrowserForLocation() {
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(getCords);
+    // We searched for a location
+    console.log("searchLat: " + sessionStorage.getItem("searchLat"));
+    console.log("searchLon: " + sessionStorage.getItem("searchLon"));
+
+    if(sessionStorage.getItem("searchLat") != null && sessionStorage.getItem("searchLon") != null) {
+       var searchLat = sessionStorage.getItem("searchLat");
+       var searchLon = sessionStorage.getItem("searchLon");
+       console.log("search lat and lon wern't empty");
+       updateNavbarText(searchLat, searchLon);
+       getWeather(searchLat, searchLon)
+       sessionStorage.clear();
+    }
+
+    // We didn't search for a location (use current location)
+    else if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(updatePage);
     } else {
         console.error("Geolocation is not supported by this browser.");
     }
@@ -27,23 +43,25 @@ function askBrowserForLocation() {
     Main function that calls the other functions
     update navbar > get current weather > get future weather
 */
-function getCords(position) {
+function updatePage(position) {
     updateNavbarText(position.coords.latitude, position.coords.longitude)   
-    
+    getWeather(position.coords.latitude, position.coords.longitude)
+}
+
+function getWeather(lat, lon) {
     var excludedAPIFields = "minutely,daily";
 
-    // Load the future forecast last
-    fetch('https://api.openweathermap.org/data/3.0/onecall?lat=' + position.coords.latitude + '&lon=' + position.coords.longitude + '&exclude=' + excludedAPIFields + '&appid=' + key)
-    .then(function(resp) { return resp.json()  }) // Convert response to json
-    .then(function(data) {
-        console.log(data);
-        insertCurrentWeather(data.current)
-        insertFutureWeather(data.hourly);
-    })
-    .catch(function() {
-        // Catch any errors
-        console.error("Error calling the weather API");
-    })  
+    try {
+        fetch('https://api.openweathermap.org/data/3.0/onecall?lat=' + lat + '&lon=' + lon + '&exclude=' + excludedAPIFields + '&appid=' + key)
+        .then(function(resp) { return resp.json()  }) // Convert response to json
+        .then(function(data) {
+            console.log(data);
+            insertCurrentWeather(data.current)
+            insertFutureWeather(data.hourly);
+        })
+    } catch(error) {
+        console.error(error)
+    }
 }
 
 function insertCurrentWeather(data) {
@@ -98,13 +116,13 @@ function insertFutureWeather(data) {
         var fahrenheit = Math.round(((parseFloat(forecast.temp) - 273.15) * 1.8) + 32);
         //var fahrenheitFeelLike = Math.round(((parseFloat(forecast.feels_like) - 273.15) * 1.8) + 32);
 
-        date = new Date(forecast.dt * 1000)
-        dateString = date.toDateString()
-        time = formatAMPM(date)
+        var date = new Date(forecast.dt * 1000);
+        var dateString = date.toDateString();
+        var time = formatAMPM(date);
 
-        currDate = new Date()
-        currDateString = currDate.toDateString()
-        let dateText = ""
+        var currDate = new Date();
+        var currDateString = currDate.toDateString();
+        let dateText = "";
 
         const tomorrow = new Date(new Date().getTime() + (24 * 60 * 60 * 1000));
 
@@ -140,7 +158,7 @@ function insertFutureWeather(data) {
             }
         }
 
-        detailedForecastText = "";
+        var detailedForecastText = "";
         if (forecast.weather[0].description == "clear sky") detailedForecastText = "a clear sky"
         else detailedForecastText = forecast.weather[0].description
 
@@ -196,23 +214,22 @@ function firstDigit(num) {
 /*
     NAVBAR METHODS
 */
-function updateNavbarText(lat, lon) {
+export function updateNavbarText(lat, lon) {
     const container = document.getElementById('navbarForLocationDisplay');
 
-    fetch('https://api.openweathermap.org/geo/1.0/reverse?lat=' + lat + '&lon=' + lon + '&appid=' + key)
-    .then(function(resp) { return resp.json()  }) // Convert response to json
-    .then(function(data) {
-        content = "Forecast for " + data[0].name + ", " + data[0].state;
-        city = data[0].name;
-        state = data[0].state;
-        container.innerHTML += content;
-    })
-    .catch(function() {
-        console.error("error getting the user's location for the navbar text")
-    })
+    try {
+        fetch('https://api.openweathermap.org/geo/1.0/reverse?lat=' + lat + '&lon=' + lon + '&appid=' + key)
+        .then(function(resp) { return resp.json()  }) // Convert response to json
+        .then(function(data) {
+            var content = "Forecast for " + data[0].name + ", " + data[0].state;
+            city = data[0].name;
+            state = data[0].state;
+            container.innerHTML += content;
+        })  
+    } catch(error) {
+        console.error(error)
+    }
 }
-
-
 
 window.onload = function() {
     askBrowserForLocation();

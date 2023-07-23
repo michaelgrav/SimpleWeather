@@ -20,18 +20,24 @@
       </button>
   
       <!-- Search bar in toggle -->
+      <script type="module"> 
+        import {searchLocation} from "./scripts/searchlocation.js"; 
+        window.searchLocation = searchLocation;
+      </script> 
       <div class="collapse navbar-collapse" id="navbarText">
         <br/>
         <form class="d-flex" role="search">
-          <input class="form-control me-2" type="search" placeholder="City, State" aria-label="Search">
-          <button class="btn btn-primary" type="submit">Search</button>
+          <input class="form-control me-2" type="search" placeholder="City, State" aria-label="Search" id="locationSearchInput">
+          <button class="btn btn-primary" type="button" 
+          onclick="searchLocation(document.getElementById('locationSearchInput').value)">Search
+          </button>
         </form>
       </div>
   
     </div>  
   </nav>
 
-  <script src="./scripts/index.js"></script>
+  <script src="./scripts/index.js" type="module"></script>
   <div id="weather" class="container">
     <div id="currentWeatherContainer"></div>
 
