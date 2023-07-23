@@ -221,7 +221,7 @@ export function updateNavbarText(lat, lon) {
         fetch('https://api.openweathermap.org/geo/1.0/reverse?lat=' + lat + '&lon=' + lon + '&appid=' + key)
         .then(function(resp) { return resp.json()  }) // Convert response to json
         .then(function(data) {
-            var content = "Forecast for " + data[0].name + ", " + data[0].state;
+            var content = "Forecast for " + data[0].name + ", " + stateNameToAbbreviation(data[0].state);
             city = data[0].name;
             state = data[0].state;
             container.innerHTML += content;
@@ -229,6 +229,75 @@ export function updateNavbarText(lat, lon) {
     } catch(error) {
         console.error(error)
     }
+}
+
+function stateNameToAbbreviation(name) {
+	let states = {
+		"arizona": "AZ",
+		"alabama": "AL",
+		"alaska": "AK",
+		"arkansas": "AR",
+		"california": "CA",
+		"colorado": "CO",
+		"connecticut": "CT",
+		"district of columbia": "DC",
+		"delaware": "DE",
+		"florida": "FL",
+		"georgia": "GA",
+		"hawaii": "HI",
+		"idaho": "ID",
+		"illinois": "IL",
+		"indiana": "IN",
+		"iowa": "IA",
+		"kansas": "KS",
+		"kentucky": "KY",
+		"louisiana": "LA",
+		"maine": "ME",
+		"maryland": "MD",
+		"massachusetts": "MA",
+		"michigan": "MI",
+		"minnesota": "MN",
+		"mississippi": "MS",
+		"missouri": "MO",
+		"montana": "MT",
+		"nebraska": "NE",
+		"nevada": "NV",
+		"new hampshire": "NH",
+		"new jersey": "NJ",
+		"new mexico": "NM",
+		"new york": "NY",
+		"north carolina": "NC",
+		"north dakota": "ND",
+		"ohio": "OH",
+		"oklahoma": "OK",
+		"oregon": "OR",
+		"pennsylvania": "PA",
+		"rhode island": "RI",
+		"south carolina": "SC",
+		"south dakota": "SD",
+		"tennessee": "TN",
+		"texas": "TX",
+		"utah": "UT",
+		"vermont": "VT",
+		"virginia": "VA",
+		"washington": "WA",
+		"west virginia": "WV",
+		"wisconsin": "WI",
+		"wyoming": "WY",
+		"american samoa": "AS",
+		"guam": "GU",
+		"northern mariana islands": "MP",
+		"puerto rico": "PR",
+		"us virgin islands": "VI",
+		"us minor outlying islands": "UM"
+	}
+
+	let a = name.trim().replace(/[^\w ]/g, "").toLowerCase(); //Trim, remove all non-word characters with the exception of spaces, and convert to lowercase
+	if(states[a] !== null) {
+		return states[a];
+	}
+
+	return null;
 }
 
 window.onload = function() {
