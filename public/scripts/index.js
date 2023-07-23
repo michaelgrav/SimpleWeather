@@ -91,17 +91,33 @@ function insertCurrentWeather(data) {
         var emojiID = firstDigit(data.weather[0].id);
     }
 
-    const content = `
+    if(!Number.isNaN(windGustMilePerHour)) {
+        var content = `
+        <div class="mt-4 p-3 mainWeatherBackground text-black rounded border">
+            <h1>It's currently ${current_fahrenheit}&deg; in ${city} ${emojiMap.get(emojiID)}</h1>
+            <br/>
+            <p>${mainWeatherConditions}</p>
+            <p>🌡️ It currently feels like ${feels_like_fahrenheit}&deg;</p>
+            <p>🍃 Current wind speed is ${windSpeedMilePerHour}mph with gusts up to ${windGustMilePerHour}MPH</p>
+            <p>☁️ Cloud coverage is ${cloudCoverage}%</p>
+            <p>🌅 The sun set(s) at ${sunSetTime}</p>
+        </div>
+      `;
+    } 
+    else {
+        var content = `
             <div class="mt-4 p-3 mainWeatherBackground text-black rounded border">
                 <h1>It's currently ${current_fahrenheit}&deg; in ${city} ${emojiMap.get(emojiID)}</h1>
                 <br/>
                 <p>${mainWeatherConditions}</p>
                 <p>🌡️ It currently feels like ${feels_like_fahrenheit}&deg;</p>
-                <p>🍃 Current wind speed is ${windSpeedMilePerHour}MPH with gusts up to ${windGustMilePerHour}MPH</p>
+                <p>🍃 Current wind speed is ${windSpeedMilePerHour}mph</p>
                 <p>☁️ Cloud coverage is ${cloudCoverage}%</p>
                 <p>🌅 The sun set(s) at ${sunSetTime}</p>
             </div>
-          `;
+        `;
+    }
+    
     
     container.innerHTML += content;
 }

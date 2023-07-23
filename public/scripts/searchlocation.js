@@ -7,10 +7,9 @@ export function searchLocation(searchEntry) {
         .then(function(data) {
             sessionStorage.setItem("searchLat", data[0].lat);
             sessionStorage.setItem("searchLon", data[0].lon);
-        })  
+        })
+        .then(function() {location.reload()})
     } catch(error) {
         console.error(error)
     }
-
-    //location.reload(); 
 }
