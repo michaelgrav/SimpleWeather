@@ -18,13 +18,10 @@ var state = ''
 
 function askBrowserForLocation() {
     // We searched for a location
-    console.log("searchLat: " + sessionStorage.getItem("searchLat"));
-    console.log("searchLon: " + sessionStorage.getItem("searchLon"));
-
     if(sessionStorage.getItem("searchLat") != null && sessionStorage.getItem("searchLon") != null) {
        var searchLat = sessionStorage.getItem("searchLat");
        var searchLon = sessionStorage.getItem("searchLon");
-       console.log("search lat and lon wern't empty");
+
        updateNavbarText(searchLat, searchLon);
        getWeather(searchLat, searchLon)
        sessionStorage.clear();
@@ -49,7 +46,7 @@ function updatePage(position) {
 }
 
 function getWeather(lat, lon) {
-    var excludedAPIFields = "minutely,daily";
+    var excludedAPIFields = "minutely";
 
     try {
         fetch('https://api.openweathermap.org/data/3.0/onecall?lat=' + lat + '&lon=' + lon + '&exclude=' + excludedAPIFields + '&appid=' + key)
@@ -57,7 +54,7 @@ function getWeather(lat, lon) {
         .then(function(data) {
             console.log(data);
             insertCurrentWeather(data.current)
-            insertFutureWeather(data.hourly);
+            insertFutureWeather(data.hourly, data.daily);
         })
     } catch(error) {
         console.error(error)
@@ -122,9 +119,8 @@ function insertCurrentWeather(data) {
     container.innerHTML += content;
 }
 
-function insertFutureWeather(data) {
+function insertFutureWeather(data, dataDaily) {
     const container = document.getElementById('futureWeatherContainer');
-
     var dayEnteries = new Set();
 
     data.forEach(forecast => {
@@ -143,20 +139,29 @@ function insertFutureWeather(data) {
         const tomorrow = new Date(new Date().getTime() + (24 * 60 * 60 * 1000));
 
         // Date is today
-        if(currDateString == dateString) dateText = "Today"
+        if(currDateString == dateString) {
+            dayEnteries.add(dateString);
+            dateText = "Today"
+        }
 
         // Date is tomorrow
         else if (tomorrow.toDateString() == dateString) {
+            dayEnteries.add(dateString);
             dateText = "Tomorrow"
 
             if(!dayEnteries.has(dateText)) {
-                var tomorrowHeadingText = `
-                <hr/>
-                <h1 class="text-dark p-1 mb-3"><center>${dateText} (${dateString})</center></h1>
-                `;
+                dayEnteries.add(dateText);
 
-                container.innerHTML += tomorrowHeadingText;
-                dayEnteries.add(dateText)
+
+                var daySummary = ``
+                // Add the summary card for that day
+                dataDaily.forEach(dayEntry => {
+                    var dayDate = new Date(dayEntry.dt * 1000).toDateString();
+                    if(dayDate == dateString) {
+                        daySummary = futureWeatherCard(dayEntry, dayDate)
+                    }
+                });
+                container.innerHTML += daySummary;
             }
         }
 
@@ -164,13 +169,17 @@ function insertFutureWeather(data) {
         else {
             dateText = dateString
             if(!dayEnteries.has(dateText)) {
-                var tomorrowHeadingText = `
-                <hr/>
-                <h1 class="text-dark p-1 mb-4"><center>${dateText}</center></h1>
-                `;
-
-                container.innerHTML += tomorrowHeadingText;
                 dayEnteries.add(dateText)
+
+                var daySummary = ``
+                // Add the summary card for that day
+                dataDaily.forEach(dayEntry => {
+                    var dayDate = new Date(dayEntry.dt * 1000).toDateString();
+                    if(dayDate == dateString) {
+                        daySummary = futureWeatherCard(dayEntry, dayDate)
+                    }
+                });
+                container.innerHTML += daySummary;
             }
         }
 
@@ -200,6 +209,51 @@ function insertFutureWeather(data) {
     
         container.innerHTML += content;
     });
+
+    // Insert the rest of the future days
+    dataDaily.forEach(dayEntry => {
+        var dayDate = new Date(dayEntry.dt * 1000).toDateString();
+        if(!dayEnteries.has(dayDate)) {
+            var daySummary = futureWeatherCard(dayEntry, dayDate)
+            container.innerHTML += daySummary;
+        }
+    });
+}
+
+function futureWeatherCard(data, date) {
+    var max_fahrenheit = Math.round(((parseFloat(data.temp.max) - 273.15) * 1.8) + 32);
+    var min_fahrenheit = Math.round(((parseFloat(data.temp.min) - 273.15) * 1.8) + 32);
+
+    var windSpeedMeterPerSec = data.wind_speed;
+    var windGustMeterPerSec = data.wind_gust;
+
+    var windSpeedMilePerHour = Math.round(windSpeedMeterPerSec * 2.237)
+    var windGustMilePerHour = Math.round(windGustMeterPerSec * 2.237)
+
+    var cloudCoverage = data.clouds;
+
+    var sunRiseTime = formatAMPM(new Date(data.sunrise * 1000));
+    var sunSetTime = formatAMPM(new Date(data.sunset * 1000));
+
+    if (data.weather[0].id == 800) {
+        emojiID = 800;
+    } else {
+        var emojiID = firstDigit(data.weather[0].id);
+    }
+
+    return `
+    <hr/>
+    <div class="mt-4 p-3 mainWeatherBackground text-black rounded border">
+        <h1>${date}: ${data.summary}</h1>
+        <br/>
+        <p>🌡️ High will be ${max_fahrenheit}&deg;, low will be ${min_fahrenheit}&deg;</p>
+        <p>☂️ Chance of rain for the day is ${(data.pop * 100).toFixed(0)}%</p>
+        <p>🍃 Wind conditions will be ${windSpeedMilePerHour}mph with gusts up to ${windGustMilePerHour}MPH</p>
+        <p>☁️ Cloud coverage will be ${cloudCoverage}%</p>
+        <p>🌅 The sun will rise at at ${sunRiseTime} and set at ${sunSetTime}</p>
+    </div>
+    </br>
+    `;
 }
 
 
