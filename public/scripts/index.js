@@ -95,7 +95,7 @@ function insertCurrentWeather(data) {
             <br/>
             <p>${mainWeatherConditions}</p>
             <p>🌡️ It currently feels like ${feels_like_fahrenheit}&deg;</p>
-            <p>🍃 Current wind speed is ${windSpeedMilePerHour}mph with gusts up to ${windGustMilePerHour}MPH</p>
+            <p>🍃 Current wind speed is ${windSpeedMilePerHour}mph with gusts up to ${windGustMilePerHour}mph</p>
             <p>☁️ Cloud coverage is ${cloudCoverage}%</p>
             <p>🌅 The sun set(s) at ${sunSetTime}</p>
         </div>
@@ -248,7 +248,7 @@ function futureWeatherCard(data, date) {
         <br/>
         <p>🌡️ High will be ${max_fahrenheit}&deg;, low will be ${min_fahrenheit}&deg;</p>
         <p>☂️ Chance of rain for the day is ${(data.pop * 100).toFixed(0)}%</p>
-        <p>🍃 Wind conditions will be ${windSpeedMilePerHour}mph with gusts up to ${windGustMilePerHour}MPH</p>
+        <p>🍃 Wind conditions will be ${windSpeedMilePerHour}mph with gusts up to ${windGustMilePerHour}mph</p>
         <p>☁️ Cloud coverage will be ${cloudCoverage}%</p>
         <p>🌅 The sun will rise at at ${sunRiseTime} and set at ${sunSetTime}</p>
     </div>
