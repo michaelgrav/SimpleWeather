@@ -7,6 +7,8 @@ let emojiMap = new Map([
     [6, String.fromCodePoint(0x1F328)],
     [2, String.fromCodePoint(0x26C8)]
 ]);
+
+// Variables
 const key = '061cec208840636a12589da186d087bd';
 var city = ''
 var state = ''
@@ -19,6 +21,7 @@ function askBrowserForLocation() {
         console.error("Geolocation is not supported by this browser.");
     }
 }
+
 
 /*
     Main function that calls the other functions
@@ -165,6 +168,10 @@ function insertFutureWeather(data) {
     });
 }
 
+
+/*
+    HELPER METHODS
+*/
 function formatAMPM(date) {
     var hours = date.getHours();
     var minutes = date.getMinutes();
@@ -185,13 +192,17 @@ function firstDigit(num) {
     return (num < 0) ? -digit : digit;
 }
 
+
+/*
+    NAVBAR METHODS
+*/
 function updateNavbarText(lat, lon) {
     const container = document.getElementById('navbarForLocationDisplay');
 
     fetch('https://api.openweathermap.org/geo/1.0/reverse?lat=' + lat + '&lon=' + lon + '&appid=' + key)
     .then(function(resp) { return resp.json()  }) // Convert response to json
     .then(function(data) {
-        content = "Weather forecast for " + data[0].name + ", " + data[0].state;
+        content = "Forecast for " + data[0].name + ", " + data[0].state;
         city = data[0].name;
         state = data[0].state;
         container.innerHTML += content;
@@ -200,6 +211,8 @@ function updateNavbarText(lat, lon) {
         console.error("error getting the user's location for the navbar text")
     })
 }
+
+
 
 window.onload = function() {
     askBrowserForLocation();
