@@ -135,7 +135,7 @@ function createFutureWeatherContainers(data) {
         const content = `
             <div id="${dateString}">
                 <div id="${dayCardID}"></div>
-                <div class="table-responsive">
+                <div class="table-responsive" id="${dateString+"-entire-table"}">
                     <table class="table table-striped">
                         <thead>
                             <tr>
@@ -251,13 +251,12 @@ function insertFutureWeather(data, dataDaily) {
 
         const hourlyContainer = document.getElementById(dateString+"-table-body");
 
-
         const content = `
             <tr>
                 <td>${time}</td>
                 <td>${detailedForecastText}</td>
                 <td>${fahrenheit}&deg;</td>
-                <td>${fahrenheitFeelLike}</td>
+                <td>${fahrenheitFeelLike}&deg;</td>
                 <td>${rainChance}%</td>
                 <td>${forecast.clouds}%</td>
             </tr>
@@ -270,9 +269,13 @@ function insertFutureWeather(data, dataDaily) {
     dataDaily.forEach(dayEntry => {
         var dayDate = new Date(dayEntry.dt * 1000).toDateString();
         if(!dayEnteries.has(dayDate)) {
-            const container = document.getElementById(dayDate);
+            const container = document.getElementById(dayDate + "-day-summary-card");
             var daySummary = futureWeatherCard(dayEntry, dayDate)
             container.innerHTML += daySummary;
+
+            // Clean up the days that shouldn'y have tables (no hourly results)
+            const element = document.getElementById(dayDate+"-entire-table");
+            element.remove();
         }
     });
 }
@@ -309,7 +312,6 @@ function futureWeatherCard(data, date) {
         <p>☁️ Cloud coverage will be ${cloudCoverage}%</p>
         <p>🌅 The sun will rise at at ${sunRiseTime} and set at ${sunSetTime}</p>
     </div>
-    </br>
     `;
 }
 
