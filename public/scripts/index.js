@@ -239,18 +239,6 @@ function insertFutureWeather(data, dataDaily) {
             var emojiID = firstDigit(forecast.weather[0].id);
         }
 
-        /*
-            <div class="card">
-            <h5 class="card-header text-dark">${dateText} at ${time} ${emojiMap.get(emojiID)}</h5>
-            <div class="card-body text-dark">
-            <h3 class="card-title text-dark">It will be ${fahrenheit}&deg; with ${detailedForecastText}</h3>         
-            <p class="card-text text-dark" style="margin-bottom:0;">Chance of rain is ${rainChance}%</p>
-            <p class="card-text text-dark" style="margin:0; padding-top:0;">Cloud coverage will be ${forecast.clouds}%</p>
-            </div>
-            </div>
-            <br/>
-        */
-
         const hourlyContainer = document.getElementById(dateString+"-table-body");
 
         const content = `
