@@ -162,6 +162,8 @@ function insertFutureWeather(data, dataDaily) {
 
     var dayEnteries = new Set();
 
+    data.shift();
+
     data.forEach(forecast => {
 
         // Actual current temp
