@@ -53,6 +53,7 @@ function getWeather(lat, lon) {
         .then(function(resp) { return resp.json()  }) // Convert response to json
         .then(function(data) {
             console.log(data);
+            if('alerts' in data) insertWeatherAlerts(data.alerts);
             insertCurrentWeather(data.current)
             insertFutureWeather(data.hourly, data.daily);
         })
@@ -119,14 +120,55 @@ function insertCurrentWeather(data) {
     container.innerHTML += content;
 }
 
+/*
+    These containers will hold each day's weather forecast
+*/
+function createFutureWeatherContainers(data) {
+    const mainContainer = document.getElementById('futureWeatherContainer');
+
+    //console.log(data);
+    data.forEach(forecast => {
+        var date = new Date(forecast.dt * 1000);
+        var dateString = date.toDateString();
+        var tableBodyID = dateString + "-table-body";
+        var dayCardID = dateString + "-day-summary-card";
+        const content = `
+            <div id="${dateString}">
+                <div id="${dayCardID}"></div>
+                <div class="table-responsive" id="${dateString+"-entire-table"}">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th scope="col">Time</th>
+                                <th scope="col">Conditions</th>
+                                <th scope="col">Temp</th>
+                                <th scope="col">Feels Like</th>
+                                <th scope="col">Rain Chance</th>
+                                <th scope="col">Cloud Coverage</th>
+                            </tr>
+                        </thead>
+                        <tbody id="${tableBodyID}"></tbody>
+                    </table>
+                </div>
+            </div>
+          `;
+    
+        mainContainer.innerHTML += content;
+    });
+}
+
 function insertFutureWeather(data, dataDaily) {
-    const container = document.getElementById('futureWeatherContainer');
+    createFutureWeatherContainers(dataDaily);
+
     var dayEnteries = new Set();
 
+    data.shift();
+
     data.forEach(forecast => {
+
         // Actual current temp
         var fahrenheit = Math.round(((parseFloat(forecast.temp) - 273.15) * 1.8) + 32);
-        //var fahrenheitFeelLike = Math.round(((parseFloat(forecast.feels_like) - 273.15) * 1.8) + 32);
+        var fahrenheitFeelLike = Math.round(((parseFloat(forecast.feels_like) - 273.15) * 1.8) + 32);
 
         var date = new Date(forecast.dt * 1000);
         var dateString = date.toDateString();
@@ -137,6 +179,8 @@ function insertFutureWeather(data, dataDaily) {
         let dateText = "";
 
         const tomorrow = new Date(new Date().getTime() + (24 * 60 * 60 * 1000));
+
+        const container = document.getElementById(dateString + "-day-summary-card");
 
         // Date is today
         if(currDateString == dateString) {
@@ -195,27 +239,33 @@ function insertFutureWeather(data, dataDaily) {
             var emojiID = firstDigit(forecast.weather[0].id);
         }
 
+        const hourlyContainer = document.getElementById(dateString+"-table-body");
+
         const content = `
-            <div class="card">
-            <h5 class="card-header text-dark">${dateText} at ${time} ${emojiMap.get(emojiID)}</h5>
-            <div class="card-body text-dark">
-            <h3 class="card-title text-dark">It will be ${fahrenheit}&deg; with ${detailedForecastText}</h3>         
-            <p class="card-text text-dark" style="margin-bottom:0;">Chance of rain is ${rainChance}%</p>
-            <p class="card-text text-dark" style="margin:0; padding-top:0;">Cloud coverage will be ${forecast.clouds}%</p>
-            </div>
-            </div>
-            <br/>
+            <tr>
+                <td>${time}</td>
+                <td>${detailedForecastText}</td>
+                <td>${fahrenheit}&deg;</td>
+                <td>${fahrenheitFeelLike}&deg;</td>
+                <td>${rainChance}%</td>
+                <td>${forecast.clouds}%</td>
+            </tr>
           `;
     
-        container.innerHTML += content;
+        hourlyContainer.innerHTML += content;
     });
 
     // Insert the rest of the future days
     dataDaily.forEach(dayEntry => {
         var dayDate = new Date(dayEntry.dt * 1000).toDateString();
         if(!dayEnteries.has(dayDate)) {
+            const container = document.getElementById(dayDate + "-day-summary-card");
             var daySummary = futureWeatherCard(dayEntry, dayDate)
             container.innerHTML += daySummary;
+
+            // Clean up the days that shouldn'y have tables (no hourly results)
+            const element = document.getElementById(dayDate+"-entire-table");
+            element.remove();
         }
     });
 }
@@ -252,10 +302,53 @@ function futureWeatherCard(data, date) {
         <p>☁️ Cloud coverage will be ${cloudCoverage}%</p>
         <p>🌅 The sun will rise at at ${sunRiseTime} and set at ${sunSetTime}</p>
     </div>
-    </br>
     `;
 }
 
+function insertWeatherAlerts(data) {
+    const warningContainer = document.getElementById('weatherAlertsContainer');
+
+    //f8d7da
+    const alertDropdown = `
+    <p class="d-inline-flex gap-1">
+        <button class="btn btn-danger" type="button" data-bs-toggle="collapse" data-bs-target="#collaspedAlertContainer" aria-expanded="false" aria-controls="collaspedAlertContainer">
+            View ${data.length} weather alerts
+        </button>
+    </p>
+
+    <div class="collapse" id="collaspedAlertContainer"></div>
+    `
+
+    warningContainer.innerHTML += alertDropdown;
+
+    console.log(data);
+
+    // Insert each alert
+    data.forEach(alert => {
+        const collaspedAlertContainer = document.getElementById('collaspedAlertContainer')
+        var startDate = new Date(alert.start * 1000);
+        var startDateString = startDate.toDateString();
+        var startTime = formatAMPM(startDate);
+
+        var endDate = new Date(alert.end * 1000);
+        var endDateString = endDate.toDateString();
+        var endTime = formatAMPM(endDate);
+
+        const content = `
+        <div class="alert alert-danger" role="alert">
+            <h4 class="alert-heading">${alert.event}</h4>
+            <p class="mb-0">${startTime} to ${endTime}</p>
+
+            <p class="pt-3 pb-1">${alert.description}</p>
+
+            <p class="mb-0">${alert.sender_name}</p>
+        </div>
+        
+          `;
+
+        collaspedAlertContainer.innerHTML += content;
+    });
+}
 
 /*
     HELPER METHODS
