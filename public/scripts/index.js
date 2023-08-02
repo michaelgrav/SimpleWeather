@@ -53,6 +53,7 @@ function getWeather(lat, lon) {
         .then(function(resp) { return resp.json()  }) // Convert response to json
         .then(function(data) {
             console.log(data);
+            if('alerts' in data) insertWeatherAlerts(data.alerts);
             insertCurrentWeather(data.current)
             insertFutureWeather(data.hourly, data.daily);
         })
@@ -125,8 +126,7 @@ function insertCurrentWeather(data) {
 function createFutureWeatherContainers(data) {
     const mainContainer = document.getElementById('futureWeatherContainer');
 
-    console.log(data);
-
+    //console.log(data);
     data.forEach(forecast => {
         var date = new Date(forecast.dt * 1000);
         var dateString = date.toDateString();
@@ -305,6 +305,50 @@ function futureWeatherCard(data, date) {
     `;
 }
 
+function insertWeatherAlerts(data) {
+    const warningContainer = document.getElementById('weatherAlertsContainer');
+
+    //f8d7da
+    const alertDropdown = `
+    <p class="d-inline-flex gap-1">
+        <button class="btn btn-danger" type="button" data-bs-toggle="collapse" data-bs-target="#collaspedAlertContainer" aria-expanded="false" aria-controls="collaspedAlertContainer">
+            View ${data.length} weather alerts
+        </button>
+    </p>
+
+    <div class="collapse" id="collaspedAlertContainer"></div>
+    `
+
+    warningContainer.innerHTML += alertDropdown;
+
+    console.log(data);
+
+    // Insert each alert
+    data.forEach(alert => {
+        const collaspedAlertContainer = document.getElementById('collaspedAlertContainer')
+        var startDate = new Date(alert.start * 1000);
+        var startDateString = startDate.toDateString();
+        var startTime = formatAMPM(startDate);
+
+        var endDate = new Date(alert.end * 1000);
+        var endDateString = endDate.toDateString();
+        var endTime = formatAMPM(endDate);
+
+        const content = `
+        <div class="alert alert-danger" role="alert">
+            <h4 class="alert-heading">${alert.event}</h4>
+            <p class="mb-0">${startTime} to ${endTime}</p>
+
+            <p class="pt-3 pb-1">${alert.description}</p>
+
+            <p class="mb-0">${alert.sender_name}</p>
+        </div>
+        
+          `;
+
+        collaspedAlertContainer.innerHTML += content;
+    });
+}
 
 /*
     HELPER METHODS
