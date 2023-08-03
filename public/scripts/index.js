@@ -337,11 +337,11 @@ function insertWeatherAlerts(data) {
         const content = `
         <div class="alert alert-danger" role="alert">
             <h4 class="alert-heading">${alert.event}</h4>
-            <p class="mb-0">${startTime} to ${endTime}</p>
+            <p class="mb-0">${startDateString} at ${startTime} to ${endDateString} at ${endTime}</p>
 
             <p class="pt-3 pb-1">${alert.description}</p>
 
-            <p class="mb-0">${alert.sender_name}</p>
+            <p class="mb-0">Issuer: ${alert.sender_name}</p>
         </div>
         
           `;
