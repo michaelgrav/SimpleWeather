@@ -384,7 +384,7 @@ export function updateNavbarText(lat, lon) {
         fetch('https://api.openweathermap.org/geo/1.0/reverse?lat=' + lat + '&lon=' + lon + '&appid=' + key)
         .then(function(resp) { return resp.json()  }) // Convert response to json
         .then(function(data) {
-            console.log(data)
+            //console.log(data)
             city = data[0].name;
             state = data[0].state;
 
