@@ -52,7 +52,7 @@ function getWeather(lat, lon) {
         fetch('https://api.openweathermap.org/data/3.0/onecall?lat=' + lat + '&lon=' + lon + '&exclude=' + excludedAPIFields + '&appid=' + key)
         .then(function(resp) { return resp.json()  }) // Convert response to json
         .then(function(data) {
-            console.log(data);
+            // console.log(data);
             if('alerts' in data) insertWeatherAlerts(data.alerts);
             insertCurrentWeather(data.current)
             insertFutureWeather(data.hourly, data.daily);
@@ -126,7 +126,7 @@ function insertCurrentWeather(data) {
 function createFutureWeatherContainers(data) {
     const mainContainer = document.getElementById('futureWeatherContainer');
 
-    //console.log(data);
+    //// console.log(data);
     data.forEach(forecast => {
         var date = new Date(forecast.dt * 1000);
         var dateString = date.toDateString();
@@ -321,7 +321,7 @@ function insertWeatherAlerts(data) {
 
     warningContainer.innerHTML += alertDropdown;
 
-    console.log(data);
+    // console.log(data);
 
     // Insert each alert
     data.forEach(alert => {
@@ -384,9 +384,16 @@ export function updateNavbarText(lat, lon) {
         fetch('https://api.openweathermap.org/geo/1.0/reverse?lat=' + lat + '&lon=' + lon + '&appid=' + key)
         .then(function(resp) { return resp.json()  }) // Convert response to json
         .then(function(data) {
-            var content = "Forecast for " + data[0].name + ", " + stateNameToAbbreviation(data[0].state);
+            console.log(data)
             city = data[0].name;
             state = data[0].state;
+
+            if (state.length > 2) {
+                state = stateNameToAbbreviation(state)
+            }
+
+            var content = "Forecast for " + city + ", " + state;
+
             container.innerHTML += content;
         })  
     } catch(error) {
