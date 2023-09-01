@@ -88,7 +88,7 @@ function insertCurrentWeather(data) {
     } else {
         var emojiID = firstDigit(data.weather[0].id);
     }
-
+    //console.log(city)
     if(!Number.isNaN(windGustMilePerHour)) {
         var content = `
         <div class="mt-4 p-3 mainWeatherBackground text-black rounded border">

@@ -6,7 +6,7 @@ export function searchLocation(searchEntry) {
         .then(function(resp) { return resp.json()  }) // Convert response to json
         .then(function(data) {
             if(data.length == 0) {
-                window.alert("Search text was formatted invalid. Please do City, State");
+                window.alert("Search text was formatted invalid. Please do City, State (Full state name)");
             } else {
                 sessionStorage.setItem("searchLat", data[0].lat);
                 sessionStorage.setItem("searchLon", data[0].lon);
