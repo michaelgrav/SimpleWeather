@@ -11,7 +11,7 @@ let emojiMap = new Map([
 ]);
 
 // Variables
-const key = 'd3866051f506f22057ce7e0b40f71e36';
+const key = '';
 var city = ''
 var state = ''
 
