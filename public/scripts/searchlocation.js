@@ -1,3 +1,5 @@
+import { updatePage } from './index.js';
+
 const apiKey = 'b833cc616e6d0707092222910033fba7';
 
 export async function searchLocation(searchEntry) {
@@ -14,7 +16,8 @@ export async function searchLocation(searchEntry) {
         } else {
             sessionStorage.setItem("searchLat", data[0].lat);
             sessionStorage.setItem("searchLon", data[0].lon);
-            location.reload();
+            // Call updatePage with the new latitude and longitude
+            updatePage({coords: {latitude: data[0].lat, longitude: data[0].lon}});
         }
         
         return data;

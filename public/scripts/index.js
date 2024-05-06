@@ -16,19 +16,9 @@ var city = ''
 var state = ''
 
 
+// Update the function calls in askBrowserForLocation and updatePage
 function askBrowserForLocation() {
-    // We searched for a location
-    if(sessionStorage.getItem("searchLat") != null && sessionStorage.getItem("searchLon") != null) {
-       var searchLat = sessionStorage.getItem("searchLat");
-       var searchLon = sessionStorage.getItem("searchLon");
-
-       updateNavbarText(searchLat, searchLon);
-       getWeather(searchLat, searchLon)
-       sessionStorage.clear();
-    }
-
-    // We didn't search for a location (use current location)
-    else if (navigator.geolocation) {
+    if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(updatePage);
     } else {
         console.error("Geolocation is not supported by this browser.");
@@ -40,9 +30,8 @@ function askBrowserForLocation() {
     Main function that calls the other functions
     update navbar > get current weather > get future weather
 */
-function updatePage(position) {
-    updateNavbarText(position.coords.latitude, position.coords.longitude)   
-    getWeather(position.coords.latitude, position.coords.longitude)
+export function updatePage(position) {
+    getWeatherAndInsertCurrentWeather(position.coords.latitude, position.coords.longitude);
 }
 
 function getWeather(lat, lon) {
@@ -64,6 +53,8 @@ function getWeather(lat, lon) {
 
 function insertCurrentWeather(data) {
     const container = document.getElementById('currentWeatherContainer');
+    container.innerHTML = '';
+
 
     var current_fahrenheit = Math.round(((parseFloat(data.temp) - 273.15) * 1.8) + 32);
     var feels_like_fahrenheit = Math.round(((parseFloat(data.feels_like) - 273.15) * 1.8) + 32);
@@ -125,6 +116,7 @@ function insertCurrentWeather(data) {
 */
 function createFutureWeatherContainers(data) {
     const mainContainer = document.getElementById('futureWeatherContainer');
+    mainContainer.innerHTML = '';
 
     //// console.log(data);
     data.forEach(forecast => {
@@ -379,27 +371,49 @@ function firstDigit(num) {
 */
 export function updateNavbarText(lat, lon) {
     const container = document.getElementById('navbarForLocationDisplay');
+    container.innerHTML = '';
 
-    try {
-        fetch('https://api.openweathermap.org/geo/1.0/reverse?lat=' + lat + '&lon=' + lon + '&appid=' + key)
-        .then(function(resp) { return resp.json()  }) // Convert response to json
-        .then(function(data) {
-            //console.log(data)
-            city = data[0].name;
-            state = data[0].state;
+    return new Promise((resolve, reject) => {
+        try {
+            fetch('https://api.openweathermap.org/geo/1.0/reverse?lat=' + lat + '&lon=' + lon + '&appid=' + key)
+            .then(function(resp) { return resp.json()  }) // Convert response to json
+            .then(function(data) {
+                city = data[0].name;
+                state = data[0].state;
 
-            if (state.length > 2) {
-                state = stateNameToAbbreviation(state)
-            }
+                if (state.length > 2) {
+                    state = stateNameToAbbreviation(state)
+                }
 
-            var content = "Forecast for " + city + ", " + state;
+                var content = "Forecast for " + city + ", " + state;
 
-            container.innerHTML += content;
-        })  
-    } catch(error) {
-        console.error(error)
-    }
+                container.innerHTML += content;
+
+                resolve(city); // Resolve the promise with the city name
+            })  
+            .catch(error => {
+                reject(error); // Reject the promise if there's an error
+            });
+        } catch(error) {
+            console.error(error)
+            reject(error); // Reject the promise if there's an error
+        }
+    });
 }
+
+// Call updateNavbarText first to fetch the city name, then call insertCurrentWeather
+function getWeatherAndInsertCurrentWeather(lat, lon) {
+    updateNavbarText(lat, lon)
+    .then(city => {
+        // Fetch weather data and insert current weather using the retrieved city name
+        getWeather(lat, lon);
+    })
+    .catch(error => {
+        console.error(error);
+    });
+}
+
+
 
 function stateNameToAbbreviation(name) {
 	let states = {
