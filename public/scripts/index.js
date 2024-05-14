@@ -56,6 +56,7 @@ function getWeather(lat, lon) {
             if('alerts' in data) insertWeatherAlerts(data.alerts);
             insertCurrentWeather(data.current)
             insertFutureWeather(data.hourly, data.daily);
+            renderHourlyChart(data.hourly);
         })
     } catch(error) {
         console.error(error)
@@ -119,6 +120,53 @@ function insertCurrentWeather(data) {
     
     container.innerHTML += content;
 }
+
+function createHourlyChartData(hourlyData) {
+    const labels = [];
+    const temperatures = [];
+
+    // Extract data for each hour
+    hourlyData.forEach(hour => {
+        const time = new Date(hour.dt * 1000);
+        const hours = time.getHours() % 12 || 12; // Convert to 12-hour format
+        const ampm = hours >= 12 ? 'PM' : 'AM'; // Determine AM or PM
+        labels.push(`${hours}:${(time.getMinutes() < 10 ? '0' : '') + time.getMinutes()} ${ampm}`); // Use hour as label
+
+        // Convert temperature from Kelvin to Fahrenheit
+        const fahrenheit = Math.round(((parseFloat(hour.temp) - 273.15) * 1.8) + 32);
+        temperatures.push(fahrenheit); // Use temperature as data point
+    });
+
+    return {
+        labels: labels,
+        datasets: [{
+            label: 'Temperature (°F)',
+            data: temperatures,
+            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+            borderColor: 'rgba(255, 99, 132, 1)',
+            borderWidth: 1
+        }]
+    };
+}
+
+function renderHourlyChart(hourlyData) {
+    const ctx = document.getElementById('hourlyChart').getContext('2d');
+    const chartData = createHourlyChartData(hourlyData);
+
+    new Chart(ctx, {
+        type: 'line',
+        data: chartData,
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: false
+                }
+            }
+        }
+    });
+}
+
+
 
 /*
     These containers will hold each day's weather forecast
