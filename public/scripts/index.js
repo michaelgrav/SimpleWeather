@@ -119,7 +119,7 @@ function renderRainPercentageChart(hourlyData) {
 
     console.log(chartData)
 
-    // The second value of the array is if there is a chance of rain in the next 24 hours
+    // The second value of the array is if there is a chance of rain in the next 12 hours
     if (!chartData[1]) {
         ctx.canvas.style.display = 'none';
         return;
@@ -148,7 +148,7 @@ function renderRainPercentageChart(hourlyData) {
             plugins: {
                 title: {
                     display: true,
-                    text: 'There Is Rain Within The Next 24 Hours!',
+                    text: 'There Is Rain Within The Next 12 Hours!',
                     font: {
                         size: 16
                     }
@@ -166,10 +166,10 @@ function createRainChartData(hourlyData) {
 
     // Extract data for each hour within the next 24 hours
     const currentTime = new Date().getTime();
-    const twentyFourHoursLater = currentTime + (24 * 60 * 60 * 1000);
+    const twelveHoursLater = currentTime + (12 * 60 * 60 * 1000);
     hourlyData.forEach(hour => {
         const time = new Date(hour.dt * 1000);
-        if (time.getTime() < twentyFourHoursLater) {
+        if (time.getTime() < twelveHoursLater) {
             let hours = time.getHours();
             const ampm = hours >= 12 ? 'PM' : 'AM'; // Determine AM or PM
             hours = hours % 12 || 12; // Convert to 12-hour format
