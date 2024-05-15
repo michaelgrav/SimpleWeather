@@ -56,7 +56,7 @@ function getWeather(lat, lon) {
             if('alerts' in data) insertWeatherAlerts(data.alerts);
             insertCurrentWeather(data.current)
             insertFutureWeather(data.hourly, data.daily);
-            renderHourlyChart(data.hourly);
+            renderRainPercentageChart(data.hourly);
         })
     } catch(error) {
         console.error(error)
@@ -121,50 +121,84 @@ function insertCurrentWeather(data) {
     container.innerHTML += content;
 }
 
-function createHourlyChartData(hourlyData) {
-    const labels = [];
-    const temperatures = [];
 
-    // Extract data for each hour
-    hourlyData.forEach(hour => {
-        const time = new Date(hour.dt * 1000);
-        const hours = time.getHours() % 12 || 12; // Convert to 12-hour format
-        const ampm = hours >= 12 ? 'PM' : 'AM'; // Determine AM or PM
-        labels.push(`${hours}:${(time.getMinutes() < 10 ? '0' : '') + time.getMinutes()} ${ampm}`); // Use hour as label
+function renderRainPercentageChart(hourlyData) {
+    const ctx = document.getElementById('rainPercentageChart').getContext('2d');
+    const chartData = createRainChartData(hourlyData);
 
-        // Convert temperature from Kelvin to Fahrenheit
-        const fahrenheit = Math.round(((parseFloat(hour.temp) - 273.15) * 1.8) + 32);
-        temperatures.push(fahrenheit); // Use temperature as data point
-    });
+    console.log(chartData)
 
-    return {
-        labels: labels,
-        datasets: [{
-            label: 'Temperature (°F)',
-            data: temperatures,
-            backgroundColor: 'rgba(255, 99, 132, 0.2)',
-            borderColor: 'rgba(255, 99, 132, 1)',
-            borderWidth: 1
-        }]
-    };
-}
-
-function renderHourlyChart(hourlyData) {
-    const ctx = document.getElementById('hourlyChart').getContext('2d');
-    const chartData = createHourlyChartData(hourlyData);
+    // The second value of the array is if there is a chance of rain in the next 24 hours
+    if (!chartData[1]) {
+        ctx.canvas.style.display = 'none';
+        return;
+    }
 
     new Chart(ctx, {
         type: 'line',
-        data: chartData,
+        data: chartData[0],
         options: {
             scales: {
                 y: {
-                    beginAtZero: false
+                    beginAtZero: true, // Start y-axis at zero
+                    max: 100, // Set maximum value of y-axis to 100
+                    ticks: {
+                        stepSize: 20 // Set step size for y-axis ticks
+                    }
+                }
+            },
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'There Is Rain Within The Next 24hrs!',
+                    font: {
+                        size: 16
+                    }
                 }
             }
         }
     });
 }
+
+
+function createRainChartData(hourlyData) {
+    const labels = [];
+    const rainPercentage = [];
+    var hasNonzeroRainChance = false;
+
+    // Extract data for each hour within the next 24 hours
+    const currentTime = new Date().getTime();
+    const twentyFourHoursLater = currentTime + (24 * 60 * 60 * 1000);
+    hourlyData.forEach(hour => {
+        const time = new Date(hour.dt * 1000);
+        if (time.getTime() < twentyFourHoursLater) {
+            const hours = time.getHours() % 12 || 12; // Convert to 12-hour format
+            const ampm = hours >= 12 ? 'PM' : 'AM'; // Determine AM or PM
+            labels.push(`${hours}:${(time.getMinutes() < 10 ? '0' : '') + time.getMinutes()} ${ampm}`); // Use hour as label
+            rainPercentage.push(hour.pop * 100); // Use rain percentage as data point
+
+            if (hour.pop > 0) hasNonzeroRainChance = true;
+        }
+    });
+
+    // Return an array with the current return value and hasNonzeroRainChance boolean
+    return [
+        {
+            labels: labels,
+            datasets: [{
+                label: 'Rain Percentage',
+                data: rainPercentage,
+                backgroundColor: 'rgba(54, 162, 235, 0.2)', // Blue color
+                borderColor: 'rgba(54, 162, 235, 1)', // Blue color
+                borderWidth: 1
+            }]
+        },
+        hasNonzeroRainChance // Boolean value indicating if there is a non-zero rain chance
+    ];
+}
+
+
+
 
 
 
