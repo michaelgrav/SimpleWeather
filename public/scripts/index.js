@@ -170,14 +170,17 @@ function createRainChartData(hourlyData) {
     hourlyData.forEach(hour => {
         const time = new Date(hour.dt * 1000);
         if (time.getTime() < twentyFourHoursLater) {
-            const hours = time.getHours() % 12 || 12; // Convert to 12-hour format
+            let hours = time.getHours();
             const ampm = hours >= 12 ? 'PM' : 'AM'; // Determine AM or PM
-            labels.push(`${hours}:${(time.getMinutes() < 10 ? '0' : '') + time.getMinutes()} ${ampm}`); // Use hour as label
+            hours = hours % 12 || 12; // Convert to 12-hour format
+            const minutes = (time.getMinutes() < 10 ? '0' : '') + time.getMinutes();
+            labels.push(`${hours}:${minutes} ${ampm}`); // Use hour as label
             rainPercentage.push(hour.pop * 100); // Use rain percentage as data point
 
             if (hour.pop > 0) hasNonzeroRainChance = true;
         }
     });
+
 
     // Return an array with the current return value and hasNonzeroRainChance boolean
     return [
@@ -194,10 +197,6 @@ function createRainChartData(hourlyData) {
         hasNonzeroRainChance // Boolean value indicating if there is a non-zero rain chance
     ];
 }
-
-
-
-
 
 
 /*
