@@ -6,9 +6,6 @@ export async function searchLocation(searchEntry) {
     try {
         // Split the searchEntry into city and state
         const [city, state] = searchEntry.split(',').map(entry => entry.trim());
-        console.log("searchEntry: " + searchEntry)
-        console.log("city: " + city);
-        console.log("state: " + state);
         
         // Check if city or state is empty
         if (!city && !state) {

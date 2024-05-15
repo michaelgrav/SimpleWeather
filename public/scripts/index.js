@@ -125,6 +125,13 @@ function renderRainPercentageChart(hourlyData) {
         return;
     }
 
+    ctx.canvas.style.display = 'block';
+
+    // Destroy existing chart instance if it exists
+    if (Chart.getChart(ctx)) {
+        Chart.getChart(ctx).destroy();
+    }
+
     new Chart(ctx, {
         type: 'line',
         data: chartData[0],
@@ -141,7 +148,7 @@ function renderRainPercentageChart(hourlyData) {
             plugins: {
                 title: {
                     display: true,
-                    text: 'There Is Rain Within The Next 24hrs!',
+                    text: 'There Is Rain Within The Next 24 Hours!',
                     font: {
                         size: 16
                     }
