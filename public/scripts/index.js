@@ -136,6 +136,8 @@ function renderRainPercentageChart(hourlyData) {
         type: 'line',
         data: chartData[0],
         options: {
+            responsive: true, 
+            maintainAspectRatio: false, 
             scales: {
                 y: {
                     beginAtZero: true, // Start y-axis at zero
@@ -152,6 +154,9 @@ function renderRainPercentageChart(hourlyData) {
                     font: {
                         size: 16
                     }
+                },
+                legend: {
+                    position: 'top'
                 }
             }
         }
