@@ -70,8 +70,16 @@ function insertCurrentWeather(data) {
 
     var mainWeatherConditions = data.weather[0].main;
     var detailedWeatherConditions = data.weather[0].description
-    if (mainWeatherConditions == "Clear") mainWeatherConditions = "☂️ Current Conditions: " + "Clear skies ahead!";
-    else mainWeatherConditions = "☂️ Current Conditions: " + mainWeatherConditions + " (more specifically, " + detailedWeatherConditions + ")"
+
+    console.log(mainWeatherConditions)
+    console.log(detailedWeatherConditions)
+
+    if (mainWeatherConditions == "Clear") 
+        mainWeatherConditions = "☂️ Current Conditions: " + "Clear skies ahead!";
+    else if (mainWeatherConditions.toLowerCase() === detailedWeatherConditions.toLowerCase()) 
+        mainWeatherConditions = "☂️ Current Conditions: " + mainWeatherConditions
+    else 
+        mainWeatherConditions = "☂️ Current Conditions: " + mainWeatherConditions + " (more specifically, " + detailedWeatherConditions + ")"
 
     var sunSetTime = formatAMPM(new Date(data.sunset * 1000));
 
