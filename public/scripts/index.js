@@ -92,9 +92,9 @@ function insertCurrentWeather(data) {
             <h1>It's currently ${current_fahrenheit}&deg; in ${city} ${emojiMap.get(emojiID)}</h1>
             <br/>
             <p>${mainWeatherConditions}</p>
-            <p>🌡️ It currently feels like ${feels_like_fahrenheit}&deg;</p>
+            <p>🌡️ It feels like ${feels_like_fahrenheit}&deg;</p>
             <p>🍃 Current wind speed is ${windSpeedMilePerHour}mph with gusts up to ${windGustMilePerHour}mph</p>
-            <p>☁️ Cloud coverage is ${cloudCoverage}%</p>
+            <p>☁️ Cloud coverage is currently ${cloudCoverage}%</p>
             <p>🌅 The sun set(s) at ${sunSetTime}</p>
         </div>
       `;
@@ -105,9 +105,9 @@ function insertCurrentWeather(data) {
                 <h1>It's currently ${current_fahrenheit}&deg; in ${city} ${emojiMap.get(emojiID)}</h1>
                 <br/>
                 <p>${mainWeatherConditions}</p>
-                <p>🌡️ It currently feels like ${feels_like_fahrenheit}&deg;</p>
+                <p>🌡️ It feels like ${feels_like_fahrenheit}&deg;</p>
                 <p>🍃 Current wind speed is ${windSpeedMilePerHour}mph</p>
-                <p>☁️ Cloud coverage is ${cloudCoverage}%</p>
+                <p>☁️ Cloud coverage is currently ${cloudCoverage}%</p>
                 <p>🌅 The sun set(s) at ${sunSetTime}</p>
             </div>
         `;
