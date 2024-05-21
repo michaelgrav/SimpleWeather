@@ -71,9 +71,6 @@ function insertCurrentWeather(data) {
     var mainWeatherConditions = data.weather[0].main;
     var detailedWeatherConditions = data.weather[0].description
 
-    console.log(mainWeatherConditions)
-    console.log(detailedWeatherConditions)
-
     if (mainWeatherConditions == "Clear") 
         mainWeatherConditions = "☂️ Current Conditions: " + "Clear skies ahead!";
     else if (mainWeatherConditions.toLowerCase() === detailedWeatherConditions.toLowerCase()) 
@@ -88,7 +85,7 @@ function insertCurrentWeather(data) {
     } else {
         var emojiID = firstDigit(data.weather[0].id);
     }
-    //console.log(city)
+
     if(!Number.isNaN(windGustMilePerHour)) {
         var content = `
         <div class="mt-4 p-3 mainWeatherBackground text-black rounded border">
@@ -124,8 +121,6 @@ function insertCurrentWeather(data) {
 function renderRainPercentageChart(hourlyData) {
     const ctx = document.getElementById('rainPercentageChart').getContext('2d');
     const chartData = createRainChartData(hourlyData);
-
-    console.log(chartData)
 
     // The second value of the array is if there is a chance of rain in the next 12 hours
     if (!chartData[1]) {
@@ -219,7 +214,6 @@ function createFutureWeatherContainers(data) {
     const mainContainer = document.getElementById('futureWeatherContainer');
     mainContainer.innerHTML = '';
 
-    //// console.log(data);
     data.forEach(forecast => {
         var date = new Date(forecast.dt * 1000);
         var dateString = date.toDateString();
@@ -413,8 +407,6 @@ function insertWeatherAlerts(data) {
     `
 
     warningContainer.innerHTML += alertDropdown;
-
-    // console.log(data);
 
     // Insert each alert
     data.forEach(alert => {
