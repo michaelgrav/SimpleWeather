@@ -1,8 +1,9 @@
-import { updatePage } from './index.js';
+import { updatePage } from './index';
+import { Modal } from 'bootstrap';
 
 const apiKey = 'b833cc616e6d0707092222910033fba7';
 
-export async function searchLocation(searchEntry) {
+export async function searchLocation(searchEntry: string) {
     try {
         // Split the searchEntry into city and state
         const [city, state] = searchEntry.split(',').map(entry => entry.trim());
@@ -38,7 +39,18 @@ export async function searchLocation(searchEntry) {
             sessionStorage.setItem("searchLat", data[0].lat);
             sessionStorage.setItem("searchLon", data[0].lon);
             // Call updatePage with the new latitude and longitude
-            updatePage({coords: {latitude: data[0].lat, longitude: data[0].lon}});
+            updatePage({
+                coords: {
+                    latitude: data[0].lat,
+                    longitude: data[0].lon,
+                    accuracy: 0,
+                    altitude: null,
+                    altitudeAccuracy: null,
+                    heading: null,
+                    speed: null
+                },
+                timestamp: Date.now()
+            });
         }
         
         return data;
@@ -48,7 +60,7 @@ export async function searchLocation(searchEntry) {
     }
 }
 
-function showAlert(message) {
+function showAlert(message: string) {
     const modal = `
         <div class="modal fade" id="alertModal" tabindex="-1" aria-labelledby="alertModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
@@ -78,7 +90,13 @@ function showAlert(message) {
     document.body.insertAdjacentHTML('beforeend', modal);
 
     // Show the modal
-    const modalInstance = new bootstrap.Modal(document.getElementById('alertModal'));
-    modalInstance.show();
+    const modalElement = document.getElementById('alertModal');
+    if (modalElement) {
+        const modalInstance = new Modal(modalElement);
+        modalInstance.show();
+    } else {
+        console.error("Failed to create modal instance. Element with id 'alertModal' not found.");
+    }
 }
+
 

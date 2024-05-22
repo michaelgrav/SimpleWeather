@@ -1,5 +1,3 @@
-//import {searchLat, searchLon} from "./searchlocation.js"
-
 let emojiMap = new Map([
     [8, String.fromCodePoint(0x2601)],
     [5, String.fromCodePoint(0x1F327)],
@@ -16,8 +14,8 @@ var city = ''
 var state = ''
 
 
-// Update the function calls in askBrowserForLocation and updatePage
-function askBrowserForLocation() {
+// Update the function calls in askBrowserForLocation and updatePage 
+function askBrowserForLocation() { 
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(updatePage);
     } else {
@@ -30,7 +28,7 @@ function askBrowserForLocation() {
     Main function that calls the other functions
     update navbar > get current weather > get future weather
 */
-export function updatePage(position) {
+export function updatePage(position: GeolocationPosition) {
     getWeatherAndInsertCurrentWeather(position.coords.latitude, position.coords.longitude);
 }
 
@@ -462,42 +460,51 @@ function firstDigit(num) {
 /*
     NAVBAR METHODS
 */
-export function updateNavbarText(lat, lon) {
+export function updateNavbarText(lat: number, lon: number) {
     const container = document.getElementById('navbarForLocationDisplay');
+    
+    // Check if container is null
+    if (!container) {
+        console.error("Container element not found");
+        return Promise.reject("Container element not found");
+    }
+
     container.innerHTML = '';
 
-    return new Promise((resolve, reject) => {
+    return new Promise<string>((resolve, reject) => {
         try {
             fetch('https://api.openweathermap.org/geo/1.0/reverse?lat=' + lat + '&lon=' + lon + '&appid=' + key)
-            .then(function(resp) { return resp.json()  }) // Convert response to json
-            .then(function(data) {
-                city = data[0].name;
-                state = data[0].state;
+            .then(resp => resp.json()) // Convert response to json
+            .then(data => {
+                const city = data[0]?.name; // Use optional chaining to access 'name' property safely
+                let state = data[0]?.state;
 
-                if (state.length > 2) {
-                    state = stateNameToAbbreviation(state)
+                if (state && state.length > 2) {
+                    state = stateNameToAbbreviation(state);
                 }
 
-                var content = "Forecast for " + city + ", " + state;
+                const content = "Forecast for " + city + ", " + state;
 
                 container.innerHTML += content;
 
                 resolve(city); // Resolve the promise with the city name
             })  
             .catch(error => {
+                console.error(error);
                 reject(error); // Reject the promise if there's an error
             });
         } catch(error) {
-            console.error(error)
+            console.error(error);
             reject(error); // Reject the promise if there's an error
         }
     });
 }
 
+
 // Call updateNavbarText first to fetch the city name, then call insertCurrentWeather
-function getWeatherAndInsertCurrentWeather(lat, lon) {
+function getWeatherAndInsertCurrentWeather(lat: number, lon: number) {
     updateNavbarText(lat, lon)
-    .then(city => {
+    .then(_ => {
         // Fetch weather data and insert current weather using the retrieved city name
         getWeather(lat, lon);
     })
@@ -508,7 +515,7 @@ function getWeatherAndInsertCurrentWeather(lat, lon) {
 
 
 
-function stateNameToAbbreviation(name) {
+function stateNameToAbbreviation(name: string) {
 	let states = {
 		"arizona": "AZ",
 		"alabama": "AL",
