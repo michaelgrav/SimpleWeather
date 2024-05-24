@@ -22,8 +22,9 @@
       </button>
   
       <!-- Search bar in toggle -->
+      <script>var exports = {};</script>
       <script type="module"> 
-        import {searchLocation} from "./comp_scripts/searchlocation.js"; 
+        import { searchLocation } from "./comp_scripts/searchlocation.js"; 
         window.searchLocation = searchLocation;
       </script> 
       <div class="collapse navbar-collapse" id="navbarText">
@@ -86,7 +87,6 @@
             <option value="Wyoming">Wyoming</option>
           </select>
 
-          <button class="btn btn-primary" type="button" 
           <button class="btn btn-primary" type="button" onclick="handleSearch()">Search</button>
         </button>
         </form>

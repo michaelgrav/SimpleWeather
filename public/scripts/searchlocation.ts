@@ -98,5 +98,3 @@ function showAlert(message: string) {
         console.error("Failed to create modal instance. Element with id 'alertModal' not found.");
     }
 }
-
-

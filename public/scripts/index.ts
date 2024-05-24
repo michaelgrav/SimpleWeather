@@ -436,25 +436,32 @@ function insertWeatherAlerts(data) {
 /*
     HELPER METHODS
 */
-function formatAMPM(date: Date) {
-    var hours = date.getHours();
-    var minutes = date.getMinutes();
-    var ampm = hours >= 12 ? 'pm' : 'am';
+function formatAMPM(date: Date): string {
+    let hours = date.getHours();
+    let minutes = date.getMinutes();
+    
+    const ampm = hours >= 12 ? 'pm' : 'am';
     hours = hours % 12;
     hours = hours ? hours : 12; // the hour '0' should be '12'
-    minutes = minutes < 10 ? '0'+minutes : minutes;
-    var strTime = hours + ':' + minutes + ' ' + ampm;
+    
+    const strMinutes = minutes < 10 ? '0' + minutes : minutes.toString();
+    const strTime = hours + ':' + strMinutes + ' ' + ampm;
     return strTime;
 }
 
+
 function firstDigit(num: number) {
-    // 1: get first digit using regex pattern
     const matches = String(num).match(/\d/);
-    // 2: convert matched item to integer
-    const digit = Number(matches[0]);
-    // 3: add sign back as needed
-    return (num < 0) ? -digit : digit;
+    
+    if (matches) {
+        const digit = Number(matches[0]);
+        
+        return (num < 0) ? -digit : digit;
+    }
+    
+    return null;
 }
+
 
 
 /*
