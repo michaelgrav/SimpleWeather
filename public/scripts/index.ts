@@ -436,7 +436,7 @@ function insertWeatherAlerts(data) {
 /*
     HELPER METHODS
 */
-function formatAMPM(date) {
+function formatAMPM(date: Date) {
     var hours = date.getHours();
     var minutes = date.getMinutes();
     var ampm = hours >= 12 ? 'pm' : 'am';
@@ -447,7 +447,7 @@ function formatAMPM(date) {
     return strTime;
 }
 
-function firstDigit(num) {
+function firstDigit(num: number) {
     // 1: get first digit using regex pattern
     const matches = String(num).match(/\d/);
     // 2: convert matched item to integer
@@ -513,71 +513,73 @@ function getWeatherAndInsertCurrentWeather(lat: number, lon: number) {
     });
 }
 
+interface States {
+    [key: string]: string;
+}
 
+const states: States = {
+    "arizona": "AZ",
+    "alabama": "AL",
+    "alaska": "AK",
+    "arkansas": "AR",
+    "california": "CA",
+    "colorado": "CO",
+    "connecticut": "CT",
+    "district of columbia": "DC",
+    "delaware": "DE",
+    "florida": "FL",
+    "georgia": "GA",
+    "hawaii": "HI",
+    "idaho": "ID",
+    "illinois": "IL",
+    "indiana": "IN",
+    "iowa": "IA",
+    "kansas": "KS",
+    "kentucky": "KY",
+    "louisiana": "LA",
+    "maine": "ME",
+    "maryland": "MD",
+    "massachusetts": "MA",
+    "michigan": "MI",
+    "minnesota": "MN",
+    "mississippi": "MS",
+    "missouri": "MO",
+    "montana": "MT",
+    "nebraska": "NE",
+    "nevada": "NV",
+    "new hampshire": "NH",
+    "new jersey": "NJ",
+    "new mexico": "NM",
+    "new york": "NY",
+    "north carolina": "NC",
+    "north dakota": "ND",
+    "ohio": "OH",
+    "oklahoma": "OK",
+    "oregon": "OR",
+    "pennsylvania": "PA",
+    "rhode island": "RI",
+    "south carolina": "SC",
+    "south dakota": "SD",
+    "tennessee": "TN",
+    "texas": "TX",
+    "utah": "UT",
+    "vermont": "VT",
+    "virginia": "VA",
+    "washington": "WA",
+    "west virginia": "WV",
+    "wisconsin": "WI",
+    "wyoming": "WY",
+    "american samoa": "AS",
+    "guam": "GU",
+    "northern mariana islands": "MP",
+    "puerto rico": "PR",
+    "us virgin islands": "VI",
+    "us minor outlying islands": "UM"
+};
 
 function stateNameToAbbreviation(name: string) {
-	let states = {
-		"arizona": "AZ",
-		"alabama": "AL",
-		"alaska": "AK",
-		"arkansas": "AR",
-		"california": "CA",
-		"colorado": "CO",
-		"connecticut": "CT",
-		"district of columbia": "DC",
-		"delaware": "DE",
-		"florida": "FL",
-		"georgia": "GA",
-		"hawaii": "HI",
-		"idaho": "ID",
-		"illinois": "IL",
-		"indiana": "IN",
-		"iowa": "IA",
-		"kansas": "KS",
-		"kentucky": "KY",
-		"louisiana": "LA",
-		"maine": "ME",
-		"maryland": "MD",
-		"massachusetts": "MA",
-		"michigan": "MI",
-		"minnesota": "MN",
-		"mississippi": "MS",
-		"missouri": "MO",
-		"montana": "MT",
-		"nebraska": "NE",
-		"nevada": "NV",
-		"new hampshire": "NH",
-		"new jersey": "NJ",
-		"new mexico": "NM",
-		"new york": "NY",
-		"north carolina": "NC",
-		"north dakota": "ND",
-		"ohio": "OH",
-		"oklahoma": "OK",
-		"oregon": "OR",
-		"pennsylvania": "PA",
-		"rhode island": "RI",
-		"south carolina": "SC",
-		"south dakota": "SD",
-		"tennessee": "TN",
-		"texas": "TX",
-		"utah": "UT",
-		"vermont": "VT",
-		"virginia": "VA",
-		"washington": "WA",
-		"west virginia": "WV",
-		"wisconsin": "WI",
-		"wyoming": "WY",
-		"american samoa": "AS",
-		"guam": "GU",
-		"northern mariana islands": "MP",
-		"puerto rico": "PR",
-		"us virgin islands": "VI",
-		"us minor outlying islands": "UM"
-	}
-
 	let a = name.trim().replace(/[^\w ]/g, "").toLowerCase(); //Trim, remove all non-word characters with the exception of spaces, and convert to lowercase
-	if(states[a] !== null) {
+	if (states[a] !== undefined) {
 		return states[a];
 	}
 
