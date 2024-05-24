@@ -11,8 +11,6 @@ let emojiMap = new Map([
 // Variables
 const key = 'b833cc616e6d0707092222910033fba7';
 var city = ''
-var state = ''
-
 
 // Update the function calls in askBrowserForLocation and updatePage 
 function askBrowserForLocation() { 
@@ -78,11 +76,14 @@ interface CurrentWeatherData {
 }
 
 
-function insertCurrentWeather(data: CurrentWeatherData) {
-    console.log(data);
+function insertCurrentWeather(data: CurrentWeatherData): undefined {
     const container = document.getElementById('currentWeatherContainer');
-    container.innerHTML = '';
+    if (!container) {
+        console.error('Current weather container not found');
+        return;
+    }
 
+    container.innerHTML = '';
 
     var current_fahrenheit = Math.round(((data.temp - 273.15) * 1.8) + 32);
     var feels_like_fahrenheit = Math.round(((data.feels_like - 273.15) * 1.8) + 32);
@@ -144,8 +145,35 @@ function insertCurrentWeather(data: CurrentWeatherData) {
     container.innerHTML += content;
 }
 
+interface HourlyWeather {
+    dt: number;
+    temp: number;
+    feels_like: number;
+    pressure: number;
+    humidity: number;
+    dew_point: number;
+    uvi: number;
+    clouds: number;
+    visibility: number;
+    wind_speed: number;
+    wind_deg: number;
+    wind_gust: number;
+    weather: {
+        id: number;
+        main: string;
+        description: string;
+        icon: string;
+    }[];
+    pop: number;
+    rain?: {
+        '1h': number;
+    };
+}
 
-function renderRainPercentageChart(hourlyData) {
+type HourlyWeatherData = HourlyWeather[];
+
+
+function renderRainPercentageChart(hourlyData: HourlyWeatherData) {
     const ctx = document.getElementById('rainPercentageChart').getContext('2d');
     const chartData = createRainChartData(hourlyData);
 
@@ -194,7 +222,7 @@ function renderRainPercentageChart(hourlyData) {
 }
 
 
-function createRainChartData(hourlyData) {
+function createRainChartData(hourlyData: HourlyWeatherData) {
     const labels = [];
     const rainPercentage = [];
     var hasNonzeroRainChance = false;

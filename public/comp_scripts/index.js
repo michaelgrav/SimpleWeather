@@ -13,7 +13,6 @@ let emojiMap = new Map([
 // Variables
 const key = 'b833cc616e6d0707092222910033fba7';
 var city = '';
-var state = '';
 // Update the function calls in askBrowserForLocation and updatePage 
 function askBrowserForLocation() {
     if (navigator.geolocation) {
@@ -50,8 +49,11 @@ function getWeather(lat, lon) {
     }
 }
 function insertCurrentWeather(data) {
-    console.log(data);
     const container = document.getElementById('currentWeatherContainer');
+    if (!container) {
+        console.error('Current weather container not found');
+        return;
+    }
     container.innerHTML = '';
     var current_fahrenheit = Math.round(((data.temp - 273.15) * 1.8) + 32);
     var feels_like_fahrenheit = Math.round(((data.feels_like - 273.15) * 1.8) + 32);
