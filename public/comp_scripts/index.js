@@ -50,10 +50,11 @@ function getWeather(lat, lon) {
     }
 }
 function insertCurrentWeather(data) {
+    console.log(data);
     const container = document.getElementById('currentWeatherContainer');
     container.innerHTML = '';
-    var current_fahrenheit = Math.round(((parseFloat(data.temp) - 273.15) * 1.8) + 32);
-    var feels_like_fahrenheit = Math.round(((parseFloat(data.feels_like) - 273.15) * 1.8) + 32);
+    var current_fahrenheit = Math.round(((data.temp - 273.15) * 1.8) + 32);
+    var feels_like_fahrenheit = Math.round(((data.feels_like - 273.15) * 1.8) + 32);
     var windSpeedMeterPerSec = data.wind_speed;
     var windGustMeterPerSec = data.wind_gust;
     var windSpeedMilePerHour = Math.round(windSpeedMeterPerSec * 2.237);
@@ -180,9 +181,7 @@ function createRainChartData(hourlyData) {
         hasNonzeroRainChance // Boolean value indicating if there is a non-zero rain chance
     ];
 }
-/*
-    These containers will hold each day's weather forecast
-*/
+// ------------------------------------------------------ FUTURE WEATHER DATA
 function createFutureWeatherContainers(data) {
     const mainContainer = document.getElementById('futureWeatherContainer');
     mainContainer.innerHTML = '';
@@ -335,111 +334,63 @@ function futureWeatherCard(data, date) {
     </div>
     `;
 }
-function insertWeatherAlerts(data) {
+// ------------------------------------------------------ WEATHER ALERTS
+function insertWeatherAlerts(alertsData) {
+    console.log(alertsData);
     const warningContainer = document.getElementById('weatherAlertsContainer');
-    //f8d7da
-    const alertDropdown = `
-    <p class="d-inline-flex gap-1">
-        <button class="btn btn-danger" type="button" data-bs-toggle="collapse" data-bs-target="#collaspedAlertContainer" aria-expanded="false" aria-controls="collaspedAlertContainer">
-            View ${data.length} weather alerts
-        </button>
-    </p>
+    const collaspedAlertContainer = document.getElementById('collaspedAlertContainer');
+    if (warningContainer && collaspedAlertContainer) {
+        const alertDropdown = `
+        <p class="d-inline-flex gap-1">
+            <button class="btn btn-danger" type="button" data-bs-toggle="collapse" data-bs-target="#collaspedAlertContainer" aria-expanded="false" aria-controls="collaspedAlertContainer">
+                View ${data.length} weather alerts
+            </button>
+        </p>
 
-    <div class="collapse" id="collaspedAlertContainer"></div>
-    `;
-    warningContainer.innerHTML += alertDropdown;
-    // Insert each alert
-    data.forEach(alert => {
-        const collaspedAlertContainer = document.getElementById('collaspedAlertContainer');
-        var startDate = new Date(alert.start * 1000);
-        var startDateString = startDate.toDateString();
-        var startTime = formatAMPM(startDate);
-        var endDate = new Date(alert.end * 1000);
-        var endDateString = endDate.toDateString();
-        var endTime = formatAMPM(endDate);
-        const content = `
-        <div class="alert alert-danger" role="alert">
-            <h4 class="alert-heading">${alert.event}</h4>
-            <p class="mb-0">${startDateString} at ${startTime} to ${endDateString} at ${endTime}</p>
+        <div class="collapse" id="collaspedAlertContainer"></div>
+        `;
+        warningContainer.innerHTML += alertDropdown;
+        // Insert each alert
+        alertsData.forEach(alert => {
+            console.log(alert);
+            var startDate = new Date(alert.start * 1000);
+            var startDateString = startDate.toDateString();
+            var startTime = formatAMPM(startDate);
+            var endDate = new Date(alert.end * 1000);
+            var endDateString = endDate.toDateString();
+            var endTime = formatAMPM(endDate);
+            const content = `
+            <div class="alert alert-danger" role="alert">
+                <h4 class="alert-heading">${alert.event}</h4>
+                <p class="mb-0">${startDateString} at ${startTime} to ${endDateString} at ${endTime}</p>
 
-            <p class="pt-3 pb-1">${alert.description}</p>
+                <p class="pt-3 pb-1">${alert.description}</p>
 
-            <p class="mb-0">Issuer: ${alert.sender_name}</p>
-        </div>
-        
-          `;
-        collaspedAlertContainer.innerHTML += content;
-    });
+                <p class="mb-0">Issuer: ${alert.sender_name}</p>
+            </div>
+            `;
+            collaspedAlertContainer.innerHTML += content;
+        });
+    }
 }
-/*
-    HELPER METHODS
-*/
+// ------------------------------------------------------ HELPER METHODS
 function formatAMPM(date) {
-    var hours = date.getHours();
-    var minutes = date.getMinutes();
-    var ampm = hours >= 12 ? 'pm' : 'am';
+    let hours = date.getHours();
+    let minutes = date.getMinutes();
+    const ampm = hours >= 12 ? 'pm' : 'am';
     hours = hours % 12;
     hours = hours ? hours : 12; // the hour '0' should be '12'
-    minutes = minutes < 10 ? '0' + minutes : minutes;
-    var strTime = hours + ':' + minutes + ' ' + ampm;
+    const strMinutes = minutes < 10 ? '0' + minutes : minutes.toString();
+    const strTime = hours + ':' + strMinutes + ' ' + ampm;
     return strTime;
 }
 function firstDigit(num) {
-    // 1: get first digit using regex pattern
     const matches = String(num).match(/\d/);
-    // 2: convert matched item to integer
-    const digit = Number(matches[0]);
-    // 3: add sign back as needed
-    return (num < 0) ? -digit : digit;
-}
-/*
-    NAVBAR METHODS
-*/
-function updateNavbarText(lat, lon) {
-    const container = document.getElementById('navbarForLocationDisplay');
-    // Check if container is null
-    if (!container) {
-        console.error("Container element not found");
-        return Promise.reject("Container element not found");
+    if (matches) {
+        const digit = Number(matches[0]);
+        return (num < 0) ? -digit : digit;
     }
-    container.innerHTML = '';
-    return new Promise((resolve, reject) => {
-        try {
-            fetch('https://api.openweathermap.org/geo/1.0/reverse?lat=' + lat + '&lon=' + lon + '&appid=' + key)
-                .then(resp => resp.json()) // Convert response to json
-                .then(data => {
-                var _a, _b;
-                const city = (_a = data[0]) === null || _a === void 0 ? void 0 : _a.name; // Use optional chaining to access 'name' property safely
-                let state = (_b = data[0]) === null || _b === void 0 ? void 0 : _b.state;
-                if (state && state.length > 2) {
-                    state = stateNameToAbbreviation(state);
-                }
-                const content = "Forecast for " + city + ", " + state;
-                container.innerHTML += content;
-                resolve(city); // Resolve the promise with the city name
-            })
-                .catch(error => {
-                console.error(error);
-                reject(error); // Reject the promise if there's an error
-            });
-        }
-        catch (error) {
-            console.error(error);
-            reject(error); // Reject the promise if there's an error
-        }
-    });
-}
-exports.updateNavbarText = updateNavbarText;
-// Call updateNavbarText first to fetch the city name, then call insertCurrentWeather
-function getWeatherAndInsertCurrentWeather(lat, lon) {
-    updateNavbarText(lat, lon)
-        .then(_ => {
-        // Fetch weather data and insert current weather using the retrieved city name
-        getWeather(lat, lon);
-    })
-        .catch(error => {
-        console.error(error);
-    });
+    return 0;
 }
 const states = {
     "arizona": "AZ",
@@ -502,10 +453,57 @@ const states = {
 };
 function stateNameToAbbreviation(name) {
     let a = name.trim().replace(/[^\w ]/g, "").toLowerCase(); //Trim, remove all non-word characters with the exception of spaces, and convert to lowercase
-    if (states[a] !== undefined) {
+    if (states[a] !== undefined)
         return states[a];
+    else
+        return "";
+}
+// ------------------------------------------------------ NAVBAR METHODS
+function updateNavbarText(lat, lon) {
+    const container = document.getElementById('navbarForLocationDisplay');
+    // Check if container is null
+    if (!container) {
+        console.error("Container element not found");
+        return Promise.reject("Container element not found");
     }
-    return null;
+    container.innerHTML = '';
+    return new Promise((resolve, reject) => {
+        try {
+            fetch('https://api.openweathermap.org/geo/1.0/reverse?lat=' + lat + '&lon=' + lon + '&appid=' + key)
+                .then(resp => resp.json()) // Convert response to json
+                .then(data => {
+                var _a, _b;
+                const city = (_a = data[0]) === null || _a === void 0 ? void 0 : _a.name; // Use optional chaining to access 'name' property safely
+                let state = (_b = data[0]) === null || _b === void 0 ? void 0 : _b.state;
+                if (state && state.length > 2) {
+                    state = stateNameToAbbreviation(state);
+                }
+                const content = "Forecast for " + city + ", " + state;
+                container.innerHTML += content;
+                resolve(city); // Resolve the promise with the city name
+            })
+                .catch(error => {
+                console.error(error);
+                reject(error); // Reject the promise if there's an error
+            });
+        }
+        catch (error) {
+            console.error(error);
+            reject(error); // Reject the promise if there's an error
+        }
+    });
+}
+exports.updateNavbarText = updateNavbarText;
+// Call updateNavbarText first to fetch the city name, then call insertCurrentWeather
+function getWeatherAndInsertCurrentWeather(lat, lon) {
+    updateNavbarText(lat, lon)
+        .then(_ => {
+        // Fetch weather data and insert current weather using the retrieved city name
+        getWeather(lat, lon);
+    })
+        .catch(error => {
+        console.error(error);
+    });
 }
 window.onload = function () {
     askBrowserForLocation();

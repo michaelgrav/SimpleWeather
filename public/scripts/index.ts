@@ -32,7 +32,7 @@ export function updatePage(position: GeolocationPosition) {
     getWeatherAndInsertCurrentWeather(position.coords.latitude, position.coords.longitude);
 }
 
-function getWeather(lat, lon) {
+function getWeather(lat: number, lon: number) {
     var excludedAPIFields = "minutely";
 
     try {
@@ -50,13 +50,42 @@ function getWeather(lat, lon) {
     }
 }
 
-function insertCurrentWeather(data) {
+
+// ------------------------------------------------------ CURRENT WEATHER
+interface CurrentWeather {
+    id: number;
+    main: string;
+    description: string;
+    icon: string;
+}
+
+interface CurrentWeatherData {
+    dt: number;
+    sunrise: number;
+    sunset: number;
+    temp: number;
+    feels_like: number;
+    pressure: number;
+    humidity: number;
+    dew_point: number;
+    uvi: number;
+    clouds: number;
+    visibility: number;
+    wind_speed: number;
+    wind_deg: number;
+    wind_gust: number;
+    weather: CurrentWeather[];
+}
+
+
+function insertCurrentWeather(data: CurrentWeatherData) {
+    console.log(data);
     const container = document.getElementById('currentWeatherContainer');
     container.innerHTML = '';
 
 
-    var current_fahrenheit = Math.round(((parseFloat(data.temp) - 273.15) * 1.8) + 32);
-    var feels_like_fahrenheit = Math.round(((parseFloat(data.feels_like) - 273.15) * 1.8) + 32);
+    var current_fahrenheit = Math.round(((data.temp - 273.15) * 1.8) + 32);
+    var feels_like_fahrenheit = Math.round(((data.feels_like - 273.15) * 1.8) + 32);
 
     var windSpeedMeterPerSec = data.wind_speed;
     var windGustMeterPerSec = data.wind_gust;
@@ -205,9 +234,7 @@ function createRainChartData(hourlyData) {
 }
 
 
-/*
-    These containers will hold each day's weather forecast
-*/
+// ------------------------------------------------------ FUTURE WEATHER DATA
 function createFutureWeatherContainers(data) {
     const mainContainer = document.getElementById('futureWeatherContainer');
     mainContainer.innerHTML = '';
@@ -390,52 +417,58 @@ function futureWeatherCard(data, date) {
     `;
 }
 
-function insertWeatherAlerts(data) {
+
+// ------------------------------------------------------ WEATHER ALERTS
+
+
+function insertWeatherAlerts(alertsData) {
+    console.log(alertsData);
     const warningContainer = document.getElementById('weatherAlertsContainer');
+    const collaspedAlertContainer = document.getElementById('collaspedAlertContainer')
 
-    //f8d7da
-    const alertDropdown = `
-    <p class="d-inline-flex gap-1">
-        <button class="btn btn-danger" type="button" data-bs-toggle="collapse" data-bs-target="#collaspedAlertContainer" aria-expanded="false" aria-controls="collaspedAlertContainer">
-            View ${data.length} weather alerts
-        </button>
-    </p>
+    if (warningContainer && collaspedAlertContainer) {
+        const alertDropdown = `
+        <p class="d-inline-flex gap-1">
+            <button class="btn btn-danger" type="button" data-bs-toggle="collapse" data-bs-target="#collaspedAlertContainer" aria-expanded="false" aria-controls="collaspedAlertContainer">
+                View ${data.length} weather alerts
+            </button>
+        </p>
 
-    <div class="collapse" id="collaspedAlertContainer"></div>
-    `
+        <div class="collapse" id="collaspedAlertContainer"></div>
+        `
 
-    warningContainer.innerHTML += alertDropdown;
+        warningContainer.innerHTML += alertDropdown;
 
-    // Insert each alert
-    data.forEach(alert => {
-        const collaspedAlertContainer = document.getElementById('collaspedAlertContainer')
-        var startDate = new Date(alert.start * 1000);
-        var startDateString = startDate.toDateString();
-        var startTime = formatAMPM(startDate);
+        // Insert each alert
+        alertsData.forEach(alert => {
+            console.log(alert);
+            var startDate = new Date(alert.start * 1000);
+            var startDateString = startDate.toDateString();
+            var startTime = formatAMPM(startDate);
 
-        var endDate = new Date(alert.end * 1000);
-        var endDateString = endDate.toDateString();
-        var endTime = formatAMPM(endDate);
+            var endDate = new Date(alert.end * 1000);
+            var endDateString = endDate.toDateString();
+            var endTime = formatAMPM(endDate);
 
-        const content = `
-        <div class="alert alert-danger" role="alert">
-            <h4 class="alert-heading">${alert.event}</h4>
-            <p class="mb-0">${startDateString} at ${startTime} to ${endDateString} at ${endTime}</p>
+            const content = `
+            <div class="alert alert-danger" role="alert">
+                <h4 class="alert-heading">${alert.event}</h4>
+                <p class="mb-0">${startDateString} at ${startTime} to ${endDateString} at ${endTime}</p>
 
-            <p class="pt-3 pb-1">${alert.description}</p>
+                <p class="pt-3 pb-1">${alert.description}</p>
 
-            <p class="mb-0">Issuer: ${alert.sender_name}</p>
-        </div>
-        
-          `;
+                <p class="mb-0">Issuer: ${alert.sender_name}</p>
+            </div>
+            `;
 
-        collaspedAlertContainer.innerHTML += content;
-    });
+            collaspedAlertContainer.innerHTML += content;
+        });
+    }
 }
 
-/*
-    HELPER METHODS
-*/
+
+// ------------------------------------------------------ HELPER METHODS
+
 function formatAMPM(date: Date): string {
     let hours = date.getHours();
     let minutes = date.getMinutes();
@@ -450,7 +483,7 @@ function formatAMPM(date: Date): string {
 }
 
 
-function firstDigit(num: number) {
+function firstDigit(num: number): number {
     const matches = String(num).match(/\d/);
     
     if (matches) {
@@ -459,65 +492,7 @@ function firstDigit(num: number) {
         return (num < 0) ? -digit : digit;
     }
     
-    return null;
-}
-
-
-
-/*
-    NAVBAR METHODS
-*/
-export function updateNavbarText(lat: number, lon: number) {
-    const container = document.getElementById('navbarForLocationDisplay');
-    
-    // Check if container is null
-    if (!container) {
-        console.error("Container element not found");
-        return Promise.reject("Container element not found");
-    }
-
-    container.innerHTML = '';
-
-    return new Promise<string>((resolve, reject) => {
-        try {
-            fetch('https://api.openweathermap.org/geo/1.0/reverse?lat=' + lat + '&lon=' + lon + '&appid=' + key)
-            .then(resp => resp.json()) // Convert response to json
-            .then(data => {
-                const city = data[0]?.name; // Use optional chaining to access 'name' property safely
-                let state = data[0]?.state;
-
-                if (state && state.length > 2) {
-                    state = stateNameToAbbreviation(state);
-                }
-
-                const content = "Forecast for " + city + ", " + state;
-
-                container.innerHTML += content;
-
-                resolve(city); // Resolve the promise with the city name
-            })  
-            .catch(error => {
-                console.error(error);
-                reject(error); // Reject the promise if there's an error
-            });
-        } catch(error) {
-            console.error(error);
-            reject(error); // Reject the promise if there's an error
-        }
-    });
-}
-
-
-// Call updateNavbarText first to fetch the city name, then call insertCurrentWeather
-function getWeatherAndInsertCurrentWeather(lat: number, lon: number) {
-    updateNavbarText(lat, lon)
-    .then(_ => {
-        // Fetch weather data and insert current weather using the retrieved city name
-        getWeather(lat, lon);
-    })
-    .catch(error => {
-        console.error(error);
-    });
+    return 0;
 }
 
 interface States {
@@ -584,13 +559,65 @@ const states: States = {
     "us minor outlying islands": "UM"
 };
 
-function stateNameToAbbreviation(name: string) {
+function stateNameToAbbreviation(name: string): string{
 	let a = name.trim().replace(/[^\w ]/g, "").toLowerCase(); //Trim, remove all non-word characters with the exception of spaces, and convert to lowercase
-	if (states[a] !== undefined) {
-		return states[a];
-	}
+	
+    if (states[a] !== undefined) return states[a];
+	else return "";
+}
 
-	return null;
+
+// ------------------------------------------------------ NAVBAR METHODS
+export function updateNavbarText(lat: number, lon: number) {
+    const container = document.getElementById('navbarForLocationDisplay');
+    
+    // Check if container is null
+    if (!container) {
+        console.error("Container element not found");
+        return Promise.reject("Container element not found");
+    }
+
+    container.innerHTML = '';
+
+    return new Promise<string>((resolve, reject) => {
+        try {
+            fetch('https://api.openweathermap.org/geo/1.0/reverse?lat=' + lat + '&lon=' + lon + '&appid=' + key)
+            .then(resp => resp.json()) // Convert response to json
+            .then(data => {
+                const city = data[0]?.name; // Use optional chaining to access 'name' property safely
+                let state = data[0]?.state;
+
+                if (state && state.length > 2) {
+                    state = stateNameToAbbreviation(state);
+                }
+
+                const content = "Forecast for " + city + ", " + state;
+
+                container.innerHTML += content;
+
+                resolve(city); // Resolve the promise with the city name
+            })  
+            .catch(error => {
+                console.error(error);
+                reject(error); // Reject the promise if there's an error
+            });
+        } catch(error) {
+            console.error(error);
+            reject(error); // Reject the promise if there's an error
+        }
+    });
+}
+
+// Call updateNavbarText first to fetch the city name, then call insertCurrentWeather
+function getWeatherAndInsertCurrentWeather(lat: number, lon: number) {
+    updateNavbarText(lat, lon)
+    .then(_ => {
+        // Fetch weather data and insert current weather using the retrieved city name
+        getWeather(lat, lon);
+    })
+    .catch(error => {
+        console.error(error);
+    });
 }
 
 window.onload = function() {

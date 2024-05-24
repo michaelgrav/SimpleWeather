@@ -63,6 +63,7 @@ function searchLocation(searchEntry) {
         catch (error) {
             console.error(error);
             showAlert("An error occurred while processing your request. Please try again later.");
+            return undefined;
         }
     });
 }
