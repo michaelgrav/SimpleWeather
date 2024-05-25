@@ -261,7 +261,7 @@ function insertFutureWeather(data, dataDaily, sunsetTime) {
                 const sunsetRow = `
                     <tr class="golden">
                         <td>${formatAMPM(sunsetTime)}</td>
-                        <td>🌇 Sunset</td>
+                        <td>Sunset 🌇</td>
                         <td></td>
                         <td></td>
                         <td></td>
