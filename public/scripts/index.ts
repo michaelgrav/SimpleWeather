@@ -294,7 +294,12 @@ function createRainChartData(hourlyData: HourlyWeatherArray) {
 // ------------------------------------------------------ FUTURE WEATHER DATA
 function createFutureWeatherContainers(data) {
     const mainContainer = document.getElementById('futureWeatherContainer');
-    mainContainer.innerHTML = '';
+    
+    if (!mainContainer) {
+        console.error('Document element with ID "futureWeatherContainer" not found');
+        return;
+    }
+    else mainContainer.innerHTML = '';
 
     data.forEach(forecast => {
         var date = new Date(forecast.dt * 1000);
@@ -641,7 +646,7 @@ export function updateNavbarText(lat: number, lon: number) {
             fetch('https://api.openweathermap.org/geo/1.0/reverse?lat=' + lat + '&lon=' + lon + '&appid=' + key)
             .then(resp => resp.json()) // Convert response to json
             .then(data => {
-                const city = data[0]?.name; // Use optional chaining to access 'name' property safely
+                city = data[0]?.name; // Use optional chaining to access 'name' property safely
                 let state = data[0]?.state;
 
                 if (state && state.length > 2) {

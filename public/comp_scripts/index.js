@@ -198,7 +198,12 @@ function createRainChartData(hourlyData) {
 // ------------------------------------------------------ FUTURE WEATHER DATA
 function createFutureWeatherContainers(data) {
     const mainContainer = document.getElementById('futureWeatherContainer');
-    mainContainer.innerHTML = '';
+    if (!mainContainer) {
+        console.error('Document element with ID "futureWeatherContainer" not found');
+        return;
+    }
+    else
+        mainContainer.innerHTML = '';
     data.forEach(forecast => {
         var date = new Date(forecast.dt * 1000);
         var dateString = date.toDateString();
@@ -487,7 +492,7 @@ export function updateNavbarText(lat, lon) {
                 .then(resp => resp.json()) // Convert response to json
                 .then(data => {
                 var _a, _b;
-                const city = (_a = data[0]) === null || _a === void 0 ? void 0 : _a.name; // Use optional chaining to access 'name' property safely
+                city = (_a = data[0]) === null || _a === void 0 ? void 0 : _a.name; // Use optional chaining to access 'name' property safely
                 let state = (_b = data[0]) === null || _b === void 0 ? void 0 : _b.state;
                 if (state && state.length > 2) {
                     state = stateNameToAbbreviation(state);
