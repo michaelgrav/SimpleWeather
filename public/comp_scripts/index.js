@@ -32,7 +32,7 @@ function getWeather(lat, lon) {
         fetch('https://api.openweathermap.org/data/3.0/onecall?lat=' + lat + '&lon=' + lon + '&exclude=' + excludedAPIFields + '&appid=' + key)
             .then(function (resp) { return resp.json(); }) // Convert response to json
             .then(function (data) {
-            // console.log(data);
+            console.log(data);
             if ('alerts' in data)
                 insertWeatherAlerts(data.alerts);
             insertCurrentWeather(data.current);
@@ -195,7 +195,6 @@ function createRainChartData(hourlyData) {
         hasNonzeroRainChance // Boolean value indicating if there is a non-zero rain chance
     ];
 }
-// ------------------------------------------------------ FUTURE WEATHER DATA
 function createFutureWeatherContainers(data) {
     const mainContainer = document.getElementById('futureWeatherContainer');
     if (!mainContainer) {
@@ -238,8 +237,8 @@ function insertFutureWeather(data, dataDaily) {
     data.shift();
     data.forEach(forecast => {
         // Actual current temp
-        var fahrenheit = Math.round(((parseFloat(forecast.temp) - 273.15) * 1.8) + 32);
-        var fahrenheitFeelLike = Math.round(((parseFloat(forecast.feels_like) - 273.15) * 1.8) + 32);
+        var fahrenheit = Math.round(((forecast.temp - 273.15) * 1.8) + 32);
+        var fahrenheitFeelLike = Math.round(((forecast.feels_like - 273.15) * 1.8) + 32);
         var date = new Date(forecast.dt * 1000);
         var dateString = date.toDateString();
         var time = formatAMPM(date);
@@ -267,6 +266,10 @@ function insertFutureWeather(data, dataDaily) {
                         daySummary = futureWeatherCard(dayEntry, dayDate);
                     }
                 });
+                if (!container) {
+                    console.error('day-summary-card container not found');
+                    return;
+                }
                 container.innerHTML += daySummary;
             }
         }
@@ -283,6 +286,10 @@ function insertFutureWeather(data, dataDaily) {
                         daySummary = futureWeatherCard(dayEntry, dayDate);
                     }
                 });
+                if (!container) {
+                    console.error('day-summary-card container not found');
+                    return;
+                }
                 container.innerHTML += daySummary;
             }
         }
@@ -292,11 +299,9 @@ function insertFutureWeather(data, dataDaily) {
         else
             detailedForecastText = forecast.weather[0].description;
         var rainChance = (forecast.pop * 100).toFixed(0);
-        if (forecast.weather[0].id == 800) {
-            emojiID = 800;
-        }
-        else {
-            var emojiID = firstDigit(forecast.weather[0].id);
+        var emojiID = 800;
+        if (forecast.weather[0].id !== 800) {
+            emojiID = firstDigit(forecast.weather[0].id);
         }
         const hourlyContainer = document.getElementById(dateString + "-table-body");
         const content = `
@@ -309,6 +314,10 @@ function insertFutureWeather(data, dataDaily) {
                 <td>${forecast.clouds}%</td>
             </tr>
           `;
+        if (!hourlyContainer) {
+            console.error('hourlyContainer container not found');
+            return;
+        }
         hourlyContainer.innerHTML += content;
     });
     // Insert the rest of the future days
@@ -317,16 +326,25 @@ function insertFutureWeather(data, dataDaily) {
         if (!dayEnteries.has(dayDate)) {
             const container = document.getElementById(dayDate + "-day-summary-card");
             var daySummary = futureWeatherCard(dayEntry, dayDate);
+            if (!container) {
+                console.error('day-summary-card container not found');
+                return;
+            }
             container.innerHTML += daySummary;
-            // Clean up the days that shouldn'y have tables (no hourly results)
+            // Clean up the days that shouldn't have tables (no hourly results)
             const element = document.getElementById(dayDate + "-entire-table");
+            if (!element) {
+                console.error('entire-table container not found');
+                return;
+            }
             element.remove();
         }
     });
 }
 function futureWeatherCard(data, date) {
-    var max_fahrenheit = Math.round(((parseFloat(data.temp.max) - 273.15) * 1.8) + 32);
-    var min_fahrenheit = Math.round(((parseFloat(data.temp.min) - 273.15) * 1.8) + 32);
+    // Convert kelvin to fahrenheit
+    var max_fahrenheit = Math.round(((data.temp.max - 273.15) * 1.8) + 32);
+    var min_fahrenheit = Math.round(((data.temp.min - 273.15) * 1.8) + 32);
     var windSpeedMeterPerSec = data.wind_speed;
     var windGustMeterPerSec = data.wind_gust;
     var windSpeedMilePerHour = Math.round(windSpeedMeterPerSec * 2.237);
@@ -353,43 +371,44 @@ function futureWeatherCard(data, date) {
     </div>
     `;
 }
-// ------------------------------------------------------ WEATHER ALERTS
 function insertWeatherAlerts(alertsData) {
     console.log(alertsData);
     const warningContainer = document.getElementById('weatherAlertsContainer');
-    const collaspedAlertContainer = document.getElementById('collaspedAlertContainer');
-    if (warningContainer && collaspedAlertContainer) {
+    if (warningContainer) {
         const alertDropdown = `
         <p class="d-inline-flex gap-1">
             <button class="btn btn-danger" type="button" data-bs-toggle="collapse" data-bs-target="#collaspedAlertContainer" aria-expanded="false" aria-controls="collaspedAlertContainer">
-                View ${data.length} weather alerts
+                View ${alertsData.length} weather alerts
             </button>
         </p>
 
         <div class="collapse" id="collaspedAlertContainer"></div>
         `;
         warningContainer.innerHTML += alertDropdown;
-        // Insert each alert
-        alertsData.forEach(alert => {
-            console.log(alert);
-            var startDate = new Date(alert.start * 1000);
-            var startDateString = startDate.toDateString();
-            var startTime = formatAMPM(startDate);
-            var endDate = new Date(alert.end * 1000);
-            var endDateString = endDate.toDateString();
-            var endTime = formatAMPM(endDate);
-            const content = `
-            <div class="alert alert-danger" role="alert">
-                <h4 class="alert-heading">${alert.event}</h4>
-                <p class="mb-0">${startDateString} at ${startTime} to ${endDateString} at ${endTime}</p>
+        const collaspedAlertContainer = document.getElementById('collaspedAlertContainer');
+        if (collaspedAlertContainer) {
+            // Insert each alert
+            alertsData.forEach(alert => {
+                console.log(alert);
+                var startDate = new Date(alert.start * 1000);
+                var startDateString = startDate.toDateString();
+                var startTime = formatAMPM(startDate);
+                var endDate = new Date(alert.end * 1000);
+                var endDateString = endDate.toDateString();
+                var endTime = formatAMPM(endDate);
+                const content = `
+                <div class="alert alert-danger" role="alert">
+                    <h4 class="alert-heading">${alert.event}</h4>
+                    <p class="mb-0">${startDateString} at ${startTime} to ${endDateString} at ${endTime}</p>
 
-                <p class="pt-3 pb-1">${alert.description}</p>
+                    <p class="pt-3 pb-1">${alert.description}</p>
 
-                <p class="mb-0">Issuer: ${alert.sender_name}</p>
-            </div>
-            `;
-            collaspedAlertContainer.innerHTML += content;
-        });
+                    <p class="mb-0">Issuer: ${alert.sender_name}</p>
+                </div>
+                `;
+                collaspedAlertContainer.innerHTML += content;
+            });
+        }
     }
 }
 // ------------------------------------------------------ HELPER METHODS
