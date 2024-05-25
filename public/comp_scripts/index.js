@@ -34,6 +34,12 @@ function getWeather(lat, lon) {
             .then(function (data) {
             if ('alerts' in data)
                 insertWeatherAlerts(data.alerts);
+            else {
+                // Clear alerts on search
+                const warningContainer = document.getElementById('weatherAlertsContainer');
+                if (warningContainer)
+                    warningContainer.innerHTML = '';
+            }
             insertCurrentWeather(data.current);
             insertFutureWeather(data.hourly, data.daily);
             renderRainPercentageChart(data.hourly);
@@ -373,6 +379,7 @@ function futureWeatherCard(data, date) {
 function insertWeatherAlerts(alertsData) {
     const warningContainer = document.getElementById('weatherAlertsContainer');
     if (warningContainer) {
+        warningContainer.innerHTML = '';
         const alertDropdown = `
         <p class="d-inline-flex gap-1">
             <button class="btn btn-danger" type="button" data-bs-toggle="collapse" data-bs-target="#collaspedAlertContainer" aria-expanded="false" aria-controls="collaspedAlertContainer">
