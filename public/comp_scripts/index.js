@@ -40,8 +40,9 @@ function getWeather(lat, lon) {
                 if (warningContainer)
                     warningContainer.innerHTML = '';
             }
+            const sunsetTime = new Date(data.current.sunset * 1000);
             insertCurrentWeather(data.current);
-            insertFutureWeather(data.hourly, data.daily);
+            insertFutureWeather(data.hourly, data.daily, sunsetTime);
             renderRainPercentageChart(data.hourly);
         });
     }
@@ -87,7 +88,6 @@ function insertCurrentWeather(data) {
             <p>🌡️ It feels like ${feels_like_fahrenheit}&deg;</p>
             <p>🍃 Current wind speed is ${windSpeedMilePerHour}mph with gusts up to ${windGustMilePerHour}mph</p>
             <p>☁️ Cloud coverage is currently ${cloudCoverage}%</p>
-            <p>🌅 The sun set(s) at ${sunSetTime}</p>
         </div>
       `;
     }
@@ -100,7 +100,6 @@ function insertCurrentWeather(data) {
                 <p>🌡️ It feels like ${feels_like_fahrenheit}&deg;</p>
                 <p>🍃 Current wind speed is ${windSpeedMilePerHour}mph</p>
                 <p>☁️ Cloud coverage is currently ${cloudCoverage}%</p>
-                <p>🌅 The sun set(s) at ${sunSetTime}</p>
             </div>
         `;
     }
@@ -236,8 +235,9 @@ function createFutureWeatherContainers(data) {
         mainContainer.innerHTML += content;
     });
 }
-function insertFutureWeather(data, dataDaily) {
+function insertFutureWeather(data, dataDaily, sunsetTime) {
     createFutureWeatherContainers(dataDaily);
+    let sunsetRowInserted = false;
     var dayEnteries = new Set();
     data.shift();
     data.forEach(forecast => {
@@ -256,6 +256,26 @@ function insertFutureWeather(data, dataDaily) {
         if (currDateString == dateString) {
             dayEnteries.add(dateString);
             dateText = "Today";
+            // Check if the current time is after sunset
+            if (date > sunsetTime && !sunsetRowInserted) {
+                const sunsetRow = `
+                    <tr class="golden">
+                        <td>${formatAMPM(sunsetTime)}</td>
+                        <td>🌇 Sunset</td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                `;
+                const hourlyContainer = document.getElementById(dateString + "-table-body");
+                if (!hourlyContainer) {
+                    console.error('hourlyContainer container not found');
+                    return;
+                }
+                hourlyContainer.innerHTML += sunsetRow;
+                sunsetRowInserted = true;
+            }
         }
         // Date is tomorrow
         else if (tomorrow.toDateString() == dateString) {
@@ -300,7 +320,7 @@ function insertFutureWeather(data, dataDaily) {
         }
         var detailedForecastText = "";
         if (forecast.weather[0].description == "clear sky")
-            detailedForecastText = "a clear sky";
+            detailedForecastText = "clear skies";
         else
             detailedForecastText = forecast.weather[0].description;
         var rainChance = (forecast.pop * 100).toFixed(0);
