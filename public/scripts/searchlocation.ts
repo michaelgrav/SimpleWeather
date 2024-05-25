@@ -1,5 +1,6 @@
-import { updatePage } from './index';
-import { Modal } from 'bootstrap';
+import { updatePage } from './index.js';
+declare const bootstrap: any;
+
 
 const apiKey = 'b833cc616e6d0707092222910033fba7';
 
@@ -94,7 +95,7 @@ function showAlert(message: string) {
     // Show the modal
     const modalElement = document.getElementById('alertModal');
     if (modalElement) {
-        const modalInstance = new Modal(modalElement);
+        const modalInstance = new bootstrap.Modal(modalElement);
         modalInstance.show();
     } else {
         console.error("Failed to create modal instance. Element with id 'alertModal' not found.");

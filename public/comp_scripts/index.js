@@ -1,6 +1,3 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.updateNavbarText = exports.updatePage = void 0;
 let emojiMap = new Map([
     [8, String.fromCodePoint(0x2601)],
     [5, String.fromCodePoint(0x1F327)],
@@ -26,10 +23,9 @@ function askBrowserForLocation() {
     Main function that calls the other functions
     update navbar > get current weather > get future weather
 */
-function updatePage(position) {
+export function updatePage(position) {
     getWeatherAndInsertCurrentWeather(position.coords.latitude, position.coords.longitude);
 }
-exports.updatePage = updatePage;
 function getWeather(lat, lon) {
     var excludedAPIFields = "minutely";
     try {
@@ -106,19 +102,35 @@ function insertCurrentWeather(data) {
     container.innerHTML += content;
 }
 function renderRainPercentageChart(hourlyData) {
-    const ctx = document.getElementById('rainPercentageChart').getContext('2d');
-    const chartData = createRainChartData(hourlyData);
-    // The second value of the array is if there is a chance of rain in the next 12 hours
-    if (!chartData[1]) {
-        ctx.canvas.style.display = 'none';
+    const canvas = document.getElementById('rainPercentageChart');
+    if (!canvas) {
+        console.error('Canvas element with ID "rainPercentageChart" not found');
         return;
     }
-    ctx.canvas.style.display = 'block';
-    // Destroy existing chart instance if it exists
-    if (Chart.getChart(ctx)) {
-        Chart.getChart(ctx).destroy();
+    const ctx = canvas.getContext('2d');
+    if (!ctx) {
+        console.error('Canvas context not available');
+        return;
     }
-    new Chart(ctx, {
+    const chartData = createRainChartData(hourlyData);
+    if (!chartData[1]) {
+        canvas.style.display = 'none';
+        return;
+    }
+    canvas.style.display = 'block';
+    // Ensure Chart.js is available globally or imported properly
+    if (typeof Chart === 'undefined') {
+        console.error('Chart.js not found. Make sure it is imported or available globally.');
+        return;
+    }
+    // Destroy existing chart instance if it exists
+    const existingChart = Chart.getChart(ctx);
+    if (existingChart) {
+        existingChart.destroy();
+    }
+    // Type assertion to inform TypeScript that Chart can be constructed
+    const ChartConstructor = Chart;
+    new ChartConstructor(ctx, {
         type: 'line',
         data: chartData[0],
         options: {
@@ -461,7 +473,7 @@ function stateNameToAbbreviation(name) {
         return "";
 }
 // ------------------------------------------------------ NAVBAR METHODS
-function updateNavbarText(lat, lon) {
+export function updateNavbarText(lat, lon) {
     const container = document.getElementById('navbarForLocationDisplay');
     // Check if container is null
     if (!container) {
@@ -495,7 +507,6 @@ function updateNavbarText(lat, lon) {
         }
     });
 }
-exports.updateNavbarText = updateNavbarText;
 // Call updateNavbarText first to fetch the city name, then call insertCurrentWeather
 function getWeatherAndInsertCurrentWeather(lat, lon) {
     updateNavbarText(lat, lon)

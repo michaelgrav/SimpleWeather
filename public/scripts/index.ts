@@ -1,3 +1,5 @@
+import { Chart } from 'chart.js';
+
 let emojiMap = new Map([
     [8, String.fromCodePoint(0x2601)],
     [5, String.fromCodePoint(0x1F327)],
@@ -170,32 +172,59 @@ interface HourlyWeather {
     };
 }
 
-type HourlyWeatherData = HourlyWeather[];
+type HourlyWeatherArray = HourlyWeather[];
 
 
-function renderRainPercentageChart(hourlyData: HourlyWeatherData) {
-    const ctx = document.getElementById('rainPercentageChart').getContext('2d');
-    const chartData = createRainChartData(hourlyData);
+// Extend the Chart namespace to include the getChart method
+declare namespace Chart {
+    function getChart(ctx: CanvasRenderingContext2D | HTMLCanvasElement): Chart;
+}
 
-    // The second value of the array is if there is a chance of rain in the next 12 hours
-    if (!chartData[1]) {
-        ctx.canvas.style.display = 'none';
+function renderRainPercentageChart(hourlyData: HourlyWeatherArray) {
+    const canvas = document.getElementById('rainPercentageChart') as HTMLCanvasElement | null;
+    
+    if (!canvas) {
+        console.error('Canvas element with ID "rainPercentageChart" not found');
         return;
     }
 
-    ctx.canvas.style.display = 'block';
+    const ctx = canvas.getContext('2d');
 
-    // Destroy existing chart instance if it exists
-    if (Chart.getChart(ctx)) {
-        Chart.getChart(ctx).destroy();
+    if (!ctx) {
+        console.error('Canvas context not available');
+        return;
     }
 
-    new Chart(ctx, {
+    const chartData = createRainChartData(hourlyData);
+
+    if (!chartData[1]) {
+        canvas.style.display = 'none';
+        return;
+    }
+
+    canvas.style.display = 'block';
+
+    // Ensure Chart.js is available globally or imported properly
+    if (typeof Chart === 'undefined') {
+        console.error('Chart.js not found. Make sure it is imported or available globally.');
+        return;
+    }
+
+    // Destroy existing chart instance if it exists
+    const existingChart = Chart.getChart(ctx);
+    if (existingChart) {
+        existingChart.destroy();
+    }
+
+    // Type assertion to inform TypeScript that Chart can be constructed
+    const ChartConstructor = Chart as unknown as { new (ctx: CanvasRenderingContext2D, config: Chart.ChartConfiguration): Chart };
+
+    new ChartConstructor(ctx, {
         type: 'line',
         data: chartData[0],
         options: {
-            responsive: true, 
-            maintainAspectRatio: false, 
+            responsive: true,
+            maintainAspectRatio: false,
             scales: {
                 y: {
                     beginAtZero: true, // Start y-axis at zero
@@ -222,9 +251,9 @@ function renderRainPercentageChart(hourlyData: HourlyWeatherData) {
 }
 
 
-function createRainChartData(hourlyData: HourlyWeatherData) {
-    const labels = [];
-    const rainPercentage = [];
+function createRainChartData(hourlyData: HourlyWeatherArray) {
+    const labels: string[] = [];
+    const rainPercentage: number[] = [];
     var hasNonzeroRainChance = false;
 
     // Extract data for each hour within the next 24 hours

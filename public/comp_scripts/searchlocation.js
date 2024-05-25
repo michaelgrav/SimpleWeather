@@ -1,4 +1,3 @@
-"use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -8,12 +7,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.searchLocation = void 0;
-const index_1 = require("./index");
-const bootstrap_1 = require("bootstrap");
+import { updatePage } from './index.js';
 const apiKey = 'b833cc616e6d0707092222910033fba7';
-function searchLocation(searchEntry) {
+export function searchLocation(searchEntry) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             // Split the searchEntry into city and state
@@ -45,7 +41,7 @@ function searchLocation(searchEntry) {
                 sessionStorage.setItem("searchLat", data[0].lat);
                 sessionStorage.setItem("searchLon", data[0].lon);
                 // Call updatePage with the new latitude and longitude
-                (0, index_1.updatePage)({
+                updatePage({
                     coords: {
                         latitude: data[0].lat,
                         longitude: data[0].lon,
@@ -67,7 +63,6 @@ function searchLocation(searchEntry) {
         }
     });
 }
-exports.searchLocation = searchLocation;
 function showAlert(message) {
     const modal = `
         <div class="modal fade" id="alertModal" tabindex="-1" aria-labelledby="alertModalLabel" aria-hidden="true">
@@ -97,7 +92,7 @@ function showAlert(message) {
     // Show the modal
     const modalElement = document.getElementById('alertModal');
     if (modalElement) {
-        const modalInstance = new bootstrap_1.Modal(modalElement);
+        const modalInstance = new bootstrap.Modal(modalElement);
         modalInstance.show();
     }
     else {
