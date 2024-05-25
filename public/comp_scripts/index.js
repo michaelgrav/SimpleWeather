@@ -32,7 +32,6 @@ function getWeather(lat, lon) {
         fetch('https://api.openweathermap.org/data/3.0/onecall?lat=' + lat + '&lon=' + lon + '&exclude=' + excludedAPIFields + '&appid=' + key)
             .then(function (resp) { return resp.json(); }) // Convert response to json
             .then(function (data) {
-            console.log(data);
             if ('alerts' in data)
                 insertWeatherAlerts(data.alerts);
             insertCurrentWeather(data.current);
@@ -372,7 +371,6 @@ function futureWeatherCard(data, date) {
     `;
 }
 function insertWeatherAlerts(alertsData) {
-    console.log(alertsData);
     const warningContainer = document.getElementById('weatherAlertsContainer');
     if (warningContainer) {
         const alertDropdown = `
@@ -389,7 +387,6 @@ function insertWeatherAlerts(alertsData) {
         if (collaspedAlertContainer) {
             // Insert each alert
             alertsData.forEach(alert => {
-                console.log(alert);
                 var startDate = new Date(alert.start * 1000);
                 var startDateString = startDate.toDateString();
                 var startTime = formatAMPM(startDate);

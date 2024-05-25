@@ -1,5 +1,3 @@
-import { Chart } from 'chart.js';
-
 let emojiMap = new Map([
     [8, String.fromCodePoint(0x2601)],
     [5, String.fromCodePoint(0x1F327)],
@@ -39,7 +37,6 @@ function getWeather(lat: number, lon: number) {
         fetch('https://api.openweathermap.org/data/3.0/onecall?lat=' + lat + '&lon=' + lon + '&exclude=' + excludedAPIFields + '&appid=' + key)
         .then(function(resp) { return resp.json()  }) // Convert response to json
         .then(function(data) {
-            console.log(data);
             if('alerts' in data) insertWeatherAlerts(data.alerts);
             insertCurrentWeather(data.current)
             insertFutureWeather(data.hourly, data.daily);
@@ -174,10 +171,57 @@ interface HourlyWeather {
 
 type HourlyWeatherArray = HourlyWeather[];
 
-
-// Extend the Chart namespace to include the getChart method
 declare namespace Chart {
     function getChart(ctx: CanvasRenderingContext2D | HTMLCanvasElement): Chart;
+
+    export interface ChartConfiguration {
+        type: string;
+        data: ChartData | boolean;
+        options: ChartOptions;
+    }
+
+    export interface ChartData {
+        labels: string[];
+        datasets: ChartDataset[];
+    }
+
+    export interface ChartDataset {
+        label: string;
+        data: number[];
+        backgroundColor: string;
+        borderColor: string;
+        borderWidth: number;
+    }
+
+    export interface ChartOptions {
+        responsive: boolean;
+        maintainAspectRatio: boolean;
+        scales: {
+            y: {
+                beginAtZero: boolean;
+                max: number;
+                ticks: {
+                    stepSize: number;
+                };
+            };
+        };
+        plugins: {
+            title: ChartTitleOptions;
+            legend: ChartLegendOptions;
+        };
+    }
+
+    export interface ChartTitleOptions {
+        display: boolean;
+        text: string;
+        font: {
+            size: number;
+        };
+    }
+
+    export interface ChartLegendOptions {
+        position: string;
+    }
 }
 
 function renderRainPercentageChart(hourlyData: HourlyWeatherArray) {
@@ -560,7 +604,6 @@ interface WeatherAlert {
 type WeatherAlertArray = WeatherAlert[];
 
 function insertWeatherAlerts(alertsData: WeatherAlertArray) {
-    console.log(alertsData);
     const warningContainer = document.getElementById('weatherAlertsContainer');
 
     if (warningContainer) {
@@ -580,7 +623,6 @@ function insertWeatherAlerts(alertsData: WeatherAlertArray) {
         if (collaspedAlertContainer) {
             // Insert each alert
             alertsData.forEach(alert => {
-                console.log(alert);
                 var startDate = new Date(alert.start * 1000);
                 var startDateString = startDate.toDateString();
                 var startTime = formatAMPM(startDate);
