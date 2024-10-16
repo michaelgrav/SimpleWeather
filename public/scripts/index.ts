@@ -91,60 +91,52 @@ function insertCurrentWeather(data: CurrentWeatherData): undefined {
 
     container.innerHTML = '';
 
-    var current_fahrenheit = Math.round(((data.temp - 273.15) * 1.8) + 32);
-    var feels_like_fahrenheit = Math.round(((data.feels_like - 273.15) * 1.8) + 32);
+    // Helper function to convert Kelvin to Fahrenheit
+    const kelvinToFahrenheit = (kelvin: number) => Math.round(((kelvin - 273.15) * 1.8) + 32);
 
-    var windSpeedMeterPerSec = data.wind_speed;
-    var windGustMeterPerSec = data.wind_gust;
+    // Helper function to convert m/s to mph
+    const metersPerSecToMph = (metersPerSec: number) => Math.round(metersPerSec * 2.237);
 
-    var windSpeedMilePerHour = Math.round(windSpeedMeterPerSec * 2.237)
-    var windGustMilePerHour = Math.round(windGustMeterPerSec * 2.237)
+    // Extract and calculate values
+    const currentFahrenheit = kelvinToFahrenheit(data.temp);
+    const feelsLikeFahrenheit = kelvinToFahrenheit(data.feels_like);
+
+    const windSpeedMilePerHour = metersPerSecToMph(data.wind_speed);
+    const windGustMilePerHour = metersPerSecToMph(data.wind_gust);
 
     var cloudCoverage = data.clouds;
 
     var mainWeatherConditions = data.weather[0].main;
-    var detailedWeatherConditions = data.weather[0].description
+    var detailedWeatherConditions = data.weather[0].description;
 
-    if (mainWeatherConditions == "Clear") 
-        mainWeatherConditions = "☂️ Current Conditions: " + "Clear skies ahead!";
+    if (mainWeatherConditions === "Clear") 
+        mainWeatherConditions = "☂️ Current Conditions: Clear skies ahead!";
     else if (mainWeatherConditions.toLowerCase() === detailedWeatherConditions.toLowerCase()) 
-        mainWeatherConditions = "☂️ Current Conditions: " + mainWeatherConditions
+        mainWeatherConditions = `☂️ Current Conditions: ${mainWeatherConditions}`;
     else 
-        mainWeatherConditions = "☂️ Current Conditions: " + mainWeatherConditions + " (more specifically, " + detailedWeatherConditions + ")"
+        mainWeatherConditions = `☂️ Current Conditions: ${mainWeatherConditions} (more specifically, ${detailedWeatherConditions})`;
+    
+    const sunSetTime = formatAMPM(new Date(data.sunset * 1000));
+    const emojiID = data.weather[0].id === 800 ? 800 : firstDigit(data.weather[0].id);
 
-    var sunSetTime = formatAMPM(new Date(data.sunset * 1000));
-
-    if (data.weather[0].id == 800) {
-        emojiID = 800;
-    } else {
-        var emojiID = firstDigit(data.weather[0].id);
-    }
-
-    if(!Number.isNaN(windGustMilePerHour)) {
-        var content = `
+    let content = `
         <div class="mt-4 p-3 mainWeatherBackground text-black rounded border">
-            <h1>It's currently ${current_fahrenheit}&deg; in ${city} ${emojiMap.get(emojiID)}</h1>
+            <h1>It's currently ${currentFahrenheit}&deg; in ${city} ${emojiMap.get(emojiID)}</h1>
             <br/>
             <p>${mainWeatherConditions}</p>
-            <p>🌡️ It feels like ${feels_like_fahrenheit}&deg;</p>
-            <p>🍃 Current wind speed is ${windSpeedMilePerHour}mph with gusts up to ${windGustMilePerHour}mph</p>
+            <p>🌡️ It feels like ${feelsLikeFahrenheit}&deg;</p>
+            <p>🍃 Current wind speed is ${windSpeedMilePerHour}mph`;
+
+    // Add wind gusts if available
+    if (!Number.isNaN(windGustMilePerHour)) {
+        content += ` with gusts up to ${windGustMilePerHour}mph`;
+    }
+
+    content += `
+            </p>
             <p>☁️ Cloud coverage is currently ${cloudCoverage}%</p>
         </div>
-      `;
-    } 
-    else {
-        var content = `
-            <div class="mt-4 p-3 mainWeatherBackground text-black rounded border">
-                <h1>It's currently ${current_fahrenheit}&deg; in ${city} ${emojiMap.get(emojiID)}</h1>
-                <br/>
-                <p>${mainWeatherConditions}</p>
-                <p>🌡️ It feels like ${feels_like_fahrenheit}&deg;</p>
-                <p>🍃 Current wind speed is ${windSpeedMilePerHour}mph</p>
-                <p>☁️ Cloud coverage is currently ${cloudCoverage}%</p>
-            </div>
-        `;
-    }
-    
+    `;
     
     container.innerHTML += content;
 }
