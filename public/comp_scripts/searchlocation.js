@@ -7,21 +7,21 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-import { updatePage } from './index.js';
-const apiKey = 'b833cc616e6d0707092222910033fba7';
+import { updatePage } from "./index.js";
+const apiKey = "b833cc616e6d0707092222910033fba7";
 export function searchLocation(searchEntry) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             // Split the searchEntry into city and state
-            const [city, state] = searchEntry.split(',').map(entry => entry.trim());
+            const [city, state] = searchEntry.split(",").map((entry) => entry.trim());
             // Check if city or state is empty
             if (!city && !state) {
-                showAlert("Please enter both city and state.");
+                showAlert("Please enter a city and select a state.");
                 return;
             }
             // Check if state is a valid abbreviation
             else if (!state) {
-                showAlert("Please enter a state in the dropdown.");
+                showAlert("Please select a state in the dropdown.");
                 return;
             }
             // Check if state is a valid abbreviation
@@ -31,7 +31,7 @@ export function searchLocation(searchEntry) {
             }
             const response = yield fetch(`https://api.openweathermap.org/geo/1.0/direct?q=${searchEntry}&limit=1&appid=${apiKey}`);
             if (!response.ok) {
-                throw new Error('Failed to fetch data');
+                throw new Error("Failed to fetch data");
             }
             const data = yield response.json();
             if (data.length === 0) {
@@ -49,9 +49,26 @@ export function searchLocation(searchEntry) {
                         altitude: null,
                         altitudeAccuracy: null,
                         heading: null,
-                        speed: null
+                        speed: null,
+                        toJSON: function () {
+                            return {
+                                latitude: this.latitude,
+                                longitude: this.longitude,
+                                accuracy: this.accuracy,
+                                altitude: this.altitude,
+                                altitudeAccuracy: this.altitudeAccuracy,
+                                heading: this.heading,
+                                speed: this.speed,
+                            };
+                        },
                     },
-                    timestamp: Date.now()
+                    timestamp: Date.now(),
+                    toJSON: function () {
+                        return {
+                            coords: this.coords,
+                            timestamp: this.timestamp,
+                        };
+                    },
                 });
             }
             return data;
@@ -83,14 +100,14 @@ function showAlert(message) {
         </div>
     `;
     // Remove existing modal if exists
-    const existingModal = document.getElementById('alertModal');
+    const existingModal = document.getElementById("alertModal");
     if (existingModal) {
         existingModal.remove();
     }
     // Append new modal to the body
-    document.body.insertAdjacentHTML('beforeend', modal);
+    document.body.insertAdjacentHTML("beforeend", modal);
     // Show the modal
-    const modalElement = document.getElementById('alertModal');
+    const modalElement = document.getElementById("alertModal");
     if (modalElement) {
         const modalInstance = new bootstrap.Modal(modalElement);
         modalInstance.show();
