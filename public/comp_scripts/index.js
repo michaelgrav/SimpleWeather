@@ -1,16 +1,16 @@
 let emojiMap = new Map([
     [8, String.fromCodePoint(0x2601)],
-    [5, String.fromCodePoint(0x1F327)],
-    [3, String.fromCodePoint(0x1F327)],
+    [5, String.fromCodePoint(0x1f327)],
+    [3, String.fromCodePoint(0x1f327)],
     [800, String.fromCodePoint(0x2600)],
-    [7, String.fromCodePoint(0x1F32B)],
-    [6, String.fromCodePoint(0x1F328)],
-    [2, String.fromCodePoint(0x26C8)]
+    [7, String.fromCodePoint(0x1f32b)],
+    [6, String.fromCodePoint(0x1f328)],
+    [2, String.fromCodePoint(0x26c8)],
 ]);
 // Variables
-const key = 'b833cc616e6d0707092222910033fba7';
-var city = '';
-// Update the function calls in askBrowserForLocation and updatePage 
+const key = "b833cc616e6d0707092222910033fba7";
+var city = "";
+// Update the function calls in askBrowserForLocation and updatePage
 function askBrowserForLocation() {
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(updatePage);
@@ -29,16 +29,25 @@ export function updatePage(position) {
 function getWeather(lat, lon) {
     var excludedAPIFields = "minutely";
     try {
-        fetch('https://api.openweathermap.org/data/3.0/onecall?lat=' + lat + '&lon=' + lon + '&exclude=' + excludedAPIFields + '&appid=' + key)
-            .then(function (resp) { return resp.json(); }) // Convert response to json
+        fetch("https://api.openweathermap.org/data/3.0/onecall?lat=" +
+            lat +
+            "&lon=" +
+            lon +
+            "&exclude=" +
+            excludedAPIFields +
+            "&appid=" +
+            key)
+            .then(function (resp) {
+            return resp.json();
+        }) // Convert response to json
             .then(function (data) {
-            if ('alerts' in data)
+            if ("alerts" in data)
                 insertWeatherAlerts(data.alerts);
             else {
                 // Clear alerts on search
-                const warningContainer = document.getElementById('weatherAlertsContainer');
+                const warningContainer = document.getElementById("weatherAlertsContainer");
                 if (warningContainer)
-                    warningContainer.innerHTML = '';
+                    warningContainer.innerHTML = "";
             }
             const sunsetTime = new Date(data.current.sunset * 1000);
             insertCurrentWeather(data.current);
@@ -51,80 +60,70 @@ function getWeather(lat, lon) {
     }
 }
 function insertCurrentWeather(data) {
-    const container = document.getElementById('currentWeatherContainer');
+    const container = document.getElementById("currentWeatherContainer");
     if (!container) {
-        console.error('Current weather container not found');
+        console.error("Current weather container not found");
         return;
     }
-    container.innerHTML = '';
-    var current_fahrenheit = Math.round(((data.temp - 273.15) * 1.8) + 32);
-    var feels_like_fahrenheit = Math.round(((data.feels_like - 273.15) * 1.8) + 32);
-    var windSpeedMeterPerSec = data.wind_speed;
-    var windGustMeterPerSec = data.wind_gust;
-    var windSpeedMilePerHour = Math.round(windSpeedMeterPerSec * 2.237);
-    var windGustMilePerHour = Math.round(windGustMeterPerSec * 2.237);
+    container.innerHTML = "";
+    // Helper function to convert Kelvin to Fahrenheit
+    const kelvinToFahrenheit = (kelvin) => Math.round((kelvin - 273.15) * 1.8 + 32);
+    // Helper function to convert m/s to mph
+    const metersPerSecToMph = (metersPerSec) => Math.round(metersPerSec * 2.237);
+    // Extract and calculate values
+    const currentFahrenheit = kelvinToFahrenheit(data.temp);
+    const feelsLikeFahrenheit = kelvinToFahrenheit(data.feels_like);
+    const windSpeedMilePerHour = metersPerSecToMph(data.wind_speed);
+    const windGustMilePerHour = metersPerSecToMph(data.wind_gust);
     var cloudCoverage = data.clouds;
     var mainWeatherConditions = data.weather[0].main;
     var detailedWeatherConditions = data.weather[0].description;
-    if (mainWeatherConditions == "Clear")
-        mainWeatherConditions = "☂️ Current Conditions: " + "Clear skies ahead!";
-    else if (mainWeatherConditions.toLowerCase() === detailedWeatherConditions.toLowerCase())
-        mainWeatherConditions = "☂️ Current Conditions: " + mainWeatherConditions;
+    if (mainWeatherConditions === "Clear")
+        mainWeatherConditions = "☂️ Current Conditions: Clear skies ahead!";
+    else if (mainWeatherConditions.toLowerCase() ===
+        detailedWeatherConditions.toLowerCase())
+        mainWeatherConditions = `☂️ Current Conditions: ${mainWeatherConditions}`;
     else
-        mainWeatherConditions = "☂️ Current Conditions: " + mainWeatherConditions + " (more specifically, " + detailedWeatherConditions + ")";
-    var sunSetTime = formatAMPM(new Date(data.sunset * 1000));
-    if (data.weather[0].id == 800) {
-        emojiID = 800;
-    }
-    else {
-        var emojiID = firstDigit(data.weather[0].id);
-    }
-    if (!Number.isNaN(windGustMilePerHour)) {
-        var content = `
+        mainWeatherConditions = `☂️ Current Conditions: ${mainWeatherConditions} (more specifically, ${detailedWeatherConditions})`;
+    const emojiID = data.weather[0].id === 800 ? 800 : firstDigit(data.weather[0].id);
+    let content = `
         <div class="mt-4 p-3 mainWeatherBackground text-black rounded border">
-            <h1>It's currently ${current_fahrenheit}&deg; in ${city} ${emojiMap.get(emojiID)}</h1>
+            <h1>It's currently ${currentFahrenheit}&deg; in ${city} ${emojiMap.get(emojiID)}</h1>
             <br/>
             <p>${mainWeatherConditions}</p>
-            <p>🌡️ It feels like ${feels_like_fahrenheit}&deg;</p>
-            <p>🍃 Current wind speed is ${windSpeedMilePerHour}mph with gusts up to ${windGustMilePerHour}mph</p>
+            <p>🌡️ It feels like ${feelsLikeFahrenheit}&deg;</p>
+            <p>🍃 Current wind speed is ${windSpeedMilePerHour}mph`;
+    // Add wind gusts if available
+    if (!Number.isNaN(windGustMilePerHour)) {
+        content += ` with gusts up to ${windGustMilePerHour}mph`;
+    }
+    content += `
+            </p>
             <p>☁️ Cloud coverage is currently ${cloudCoverage}%</p>
         </div>
-      `;
-    }
-    else {
-        var content = `
-            <div class="mt-4 p-3 mainWeatherBackground text-black rounded border">
-                <h1>It's currently ${current_fahrenheit}&deg; in ${city} ${emojiMap.get(emojiID)}</h1>
-                <br/>
-                <p>${mainWeatherConditions}</p>
-                <p>🌡️ It feels like ${feels_like_fahrenheit}&deg;</p>
-                <p>🍃 Current wind speed is ${windSpeedMilePerHour}mph</p>
-                <p>☁️ Cloud coverage is currently ${cloudCoverage}%</p>
-            </div>
-        `;
-    }
+    `;
     container.innerHTML += content;
 }
 function renderRainPercentageChart(hourlyData) {
-    const canvas = document.getElementById('rainPercentageChart');
+    const canvas = document.getElementById("rainPercentageChart");
     if (!canvas) {
         console.error('Canvas element with ID "rainPercentageChart" not found');
         return;
     }
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext("2d");
     if (!ctx) {
-        console.error('Canvas context not available');
+        console.error("Canvas context not available");
         return;
     }
     const chartData = createRainChartData(hourlyData);
     if (!chartData[1]) {
-        canvas.style.display = 'none';
+        canvas.style.display = "none";
         return;
     }
-    canvas.style.display = 'block';
+    canvas.style.display = "block";
     // Ensure Chart.js is available globally or imported properly
-    if (typeof Chart === 'undefined') {
-        console.error('Chart.js not found. Make sure it is imported or available globally.');
+    if (typeof Chart === "undefined") {
+        console.error("Chart.js not found. Make sure it is imported or available globally.");
         return;
     }
     // Destroy existing chart instance if it exists
@@ -135,7 +134,7 @@ function renderRainPercentageChart(hourlyData) {
     // Type assertion to inform TypeScript that Chart can be constructed
     const ChartConstructor = Chart;
     new ChartConstructor(ctx, {
-        type: 'line',
+        type: "line",
         data: chartData[0],
         options: {
             responsive: true,
@@ -145,23 +144,23 @@ function renderRainPercentageChart(hourlyData) {
                     beginAtZero: true, // Start y-axis at zero
                     max: 100, // Set maximum value of y-axis to 100
                     ticks: {
-                        stepSize: 20 // Set step size for y-axis ticks
-                    }
-                }
+                        stepSize: 20, // Set step size for y-axis ticks
+                    },
+                },
             },
             plugins: {
                 title: {
                     display: true,
-                    text: 'There Is Rain Within The Next 12 Hours!',
+                    text: "There Is Rain Within The Next 12 Hours!",
                     font: {
-                        size: 16
-                    }
+                        size: 16,
+                    },
                 },
                 legend: {
-                    position: 'top'
-                }
-            }
-        }
+                    position: "top",
+                },
+            },
+        },
     });
 }
 function createRainChartData(hourlyData) {
@@ -170,14 +169,14 @@ function createRainChartData(hourlyData) {
     var hasNonzeroRainChance = false;
     // Extract data for each hour within the next 24 hours
     const currentTime = new Date().getTime();
-    const twelveHoursLater = currentTime + (12 * 60 * 60 * 1000);
-    hourlyData.forEach(hour => {
+    const twelveHoursLater = currentTime + 12 * 60 * 60 * 1000;
+    hourlyData.forEach((hour) => {
         const time = new Date(hour.dt * 1000);
         if (time.getTime() < twelveHoursLater) {
             let hours = time.getHours();
-            const ampm = hours >= 12 ? 'PM' : 'AM'; // Determine AM or PM
+            const ampm = hours >= 12 ? "PM" : "AM"; // Determine AM or PM
             hours = hours % 12 || 12; // Convert to 12-hour format
-            const minutes = (time.getMinutes() < 10 ? '0' : '') + time.getMinutes();
+            const minutes = (time.getMinutes() < 10 ? "0" : "") + time.getMinutes();
             labels.push(`${hours}:${minutes} ${ampm}`); // Use hour as label
             rainPercentage.push(hour.pop * 100); // Use rain percentage as data point
             if (hour.pop > 0)
@@ -188,26 +187,28 @@ function createRainChartData(hourlyData) {
     return [
         {
             labels: labels,
-            datasets: [{
-                    label: 'Rain Percentage',
+            datasets: [
+                {
+                    label: "Rain Percentage",
                     data: rainPercentage,
-                    backgroundColor: 'rgba(54, 162, 235, 0.2)', // Blue color
-                    borderColor: 'rgba(54, 162, 235, 1)', // Blue color
-                    borderWidth: 1
-                }]
+                    backgroundColor: "rgba(54, 162, 235, 0.2)", // Blue color
+                    borderColor: "rgba(54, 162, 235, 1)", // Blue color
+                    borderWidth: 1,
+                },
+            ],
         },
-        hasNonzeroRainChance // Boolean value indicating if there is a non-zero rain chance
+        hasNonzeroRainChance, // Boolean value indicating if there is a non-zero rain chance
     ];
 }
 function createFutureWeatherContainers(data) {
-    const mainContainer = document.getElementById('futureWeatherContainer');
+    const mainContainer = document.getElementById("futureWeatherContainer");
     if (!mainContainer) {
         console.error('Document element with ID "futureWeatherContainer" not found');
         return;
     }
     else
-        mainContainer.innerHTML = '';
-    data.forEach(forecast => {
+        mainContainer.innerHTML = "";
+    data.forEach((forecast) => {
         var date = new Date(forecast.dt * 1000);
         var dateString = date.toDateString();
         var tableBodyID = dateString + "-table-body";
@@ -238,23 +239,23 @@ function createFutureWeatherContainers(data) {
 function insertFutureWeather(data, dataDaily, sunsetTime) {
     createFutureWeatherContainers(dataDaily);
     let sunsetRowInserted = false;
-    var dayEnteries = new Set();
+    var dayEntries = new Set();
     data.shift();
-    data.forEach(forecast => {
+    data.forEach((forecast) => {
         // Actual current temp
-        var fahrenheit = Math.round(((forecast.temp - 273.15) * 1.8) + 32);
-        var fahrenheitFeelLike = Math.round(((forecast.feels_like - 273.15) * 1.8) + 32);
+        var fahrenheit = Math.round((forecast.temp - 273.15) * 1.8 + 32);
+        var fahrenheitFeelLike = Math.round((forecast.feels_like - 273.15) * 1.8 + 32);
         var date = new Date(forecast.dt * 1000);
         var dateString = date.toDateString();
         var time = formatAMPM(date);
         var currDate = new Date();
         var currDateString = currDate.toDateString();
         let dateText = "";
-        const tomorrow = new Date(new Date().getTime() + (24 * 60 * 60 * 1000));
+        const tomorrow = new Date(new Date().getTime() + 24 * 60 * 60 * 1000);
         const container = document.getElementById(dateString + "-day-summary-card");
         // Date is today
         if (currDateString == dateString) {
-            dayEnteries.add(dateString);
+            dayEntries.add(dateString);
             dateText = "Today";
             // Check if the current time is after sunset
             if (date > sunsetTime && !sunsetRowInserted) {
@@ -270,7 +271,7 @@ function insertFutureWeather(data, dataDaily, sunsetTime) {
                 `;
                 const hourlyContainer = document.getElementById(dateString + "-table-body");
                 if (!hourlyContainer) {
-                    console.error('hourlyContainer container not found');
+                    console.error("hourlyContainer container not found");
                     return;
                 }
                 hourlyContainer.innerHTML += sunsetRow;
@@ -279,20 +280,20 @@ function insertFutureWeather(data, dataDaily, sunsetTime) {
         }
         // Date is tomorrow
         else if (tomorrow.toDateString() == dateString) {
-            dayEnteries.add(dateString);
+            dayEntries.add(dateString);
             dateText = "Tomorrow";
-            if (!dayEnteries.has(dateText)) {
-                dayEnteries.add(dateText);
+            if (!dayEntries.has(dateText)) {
+                dayEntries.add(dateText);
                 var daySummary = ``;
                 // Add the summary card for that day
-                dataDaily.forEach(dayEntry => {
+                dataDaily.forEach((dayEntry) => {
                     var dayDate = new Date(dayEntry.dt * 1000).toDateString();
                     if (dayDate == dateString) {
                         daySummary = futureWeatherCard(dayEntry, dayDate);
                     }
                 });
                 if (!container) {
-                    console.error('day-summary-card container not found');
+                    console.error("day-summary-card container not found");
                     return;
                 }
                 container.innerHTML += daySummary;
@@ -301,18 +302,18 @@ function insertFutureWeather(data, dataDaily, sunsetTime) {
         // Date is sometime past tomorrow
         else {
             dateText = dateString;
-            if (!dayEnteries.has(dateText)) {
-                dayEnteries.add(dateText);
+            if (!dayEntries.has(dateText)) {
+                dayEntries.add(dateText);
                 var daySummary = ``;
                 // Add the summary card for that day
-                dataDaily.forEach(dayEntry => {
+                dataDaily.forEach((dayEntry) => {
                     var dayDate = new Date(dayEntry.dt * 1000).toDateString();
                     if (dayDate == dateString) {
                         daySummary = futureWeatherCard(dayEntry, dayDate);
                     }
                 });
                 if (!container) {
-                    console.error('day-summary-card container not found');
+                    console.error("day-summary-card container not found");
                     return;
                 }
                 container.innerHTML += daySummary;
@@ -340,26 +341,26 @@ function insertFutureWeather(data, dataDaily, sunsetTime) {
             </tr>
           `;
         if (!hourlyContainer) {
-            console.error('hourlyContainer container not found');
+            console.error("hourlyContainer container not found");
             return;
         }
         hourlyContainer.innerHTML += content;
     });
     // Insert the rest of the future days
-    dataDaily.forEach(dayEntry => {
+    dataDaily.forEach((dayEntry) => {
         var dayDate = new Date(dayEntry.dt * 1000).toDateString();
-        if (!dayEnteries.has(dayDate)) {
+        if (!dayEntries.has(dayDate)) {
             const container = document.getElementById(dayDate + "-day-summary-card");
             var daySummary = futureWeatherCard(dayEntry, dayDate);
             if (!container) {
-                console.error('day-summary-card container not found');
+                console.error("day-summary-card container not found");
                 return;
             }
             container.innerHTML += daySummary;
             // Clean up the days that shouldn't have tables (no hourly results)
             const element = document.getElementById(dayDate + "-entire-table");
             if (!element) {
-                console.error('entire-table container not found');
+                console.error("entire-table container not found");
                 return;
             }
             element.remove();
@@ -368,8 +369,8 @@ function insertFutureWeather(data, dataDaily, sunsetTime) {
 }
 function futureWeatherCard(data, date) {
     // Convert kelvin to fahrenheit
-    var max_fahrenheit = Math.round(((data.temp.max - 273.15) * 1.8) + 32);
-    var min_fahrenheit = Math.round(((data.temp.min - 273.15) * 1.8) + 32);
+    var max_fahrenheit = Math.round((data.temp.max - 273.15) * 1.8 + 32);
+    var min_fahrenheit = Math.round((data.temp.min - 273.15) * 1.8 + 32);
     var windSpeedMeterPerSec = data.wind_speed;
     var windGustMeterPerSec = data.wind_gust;
     var windSpeedMilePerHour = Math.round(windSpeedMeterPerSec * 2.237);
@@ -397,9 +398,9 @@ function futureWeatherCard(data, date) {
     `;
 }
 function insertWeatherAlerts(alertsData) {
-    const warningContainer = document.getElementById('weatherAlertsContainer');
+    const warningContainer = document.getElementById("weatherAlertsContainer");
     if (warningContainer) {
-        warningContainer.innerHTML = '';
+        warningContainer.innerHTML = "";
         const alertDropdown = `
         <p class="d-inline-flex gap-1">
             <button class="btn btn-danger" type="button" data-bs-toggle="collapse" data-bs-target="#collaspedAlertContainer" aria-expanded="false" aria-controls="collaspedAlertContainer">
@@ -410,10 +411,10 @@ function insertWeatherAlerts(alertsData) {
         <div class="collapse" id="collaspedAlertContainer"></div>
         `;
         warningContainer.innerHTML += alertDropdown;
-        const collaspedAlertContainer = document.getElementById('collaspedAlertContainer');
+        const collaspedAlertContainer = document.getElementById("collaspedAlertContainer");
         if (collaspedAlertContainer) {
             // Insert each alert
-            alertsData.forEach(alert => {
+            alertsData.forEach((alert) => {
                 var startDate = new Date(alert.start * 1000);
                 var startDateString = startDate.toDateString();
                 var startTime = formatAMPM(startDate);
@@ -439,82 +440,85 @@ function insertWeatherAlerts(alertsData) {
 function formatAMPM(date) {
     let hours = date.getHours();
     let minutes = date.getMinutes();
-    const ampm = hours >= 12 ? 'pm' : 'am';
+    const ampm = hours >= 12 ? "pm" : "am";
     hours = hours % 12;
     hours = hours ? hours : 12; // the hour '0' should be '12'
-    const strMinutes = minutes < 10 ? '0' + minutes : minutes.toString();
-    const strTime = hours + ':' + strMinutes + ' ' + ampm;
+    const strMinutes = minutes < 10 ? "0" + minutes : minutes.toString();
+    const strTime = hours + ":" + strMinutes + " " + ampm;
     return strTime;
 }
 function firstDigit(num) {
     const matches = String(num).match(/\d/);
     if (matches) {
         const digit = Number(matches[0]);
-        return (num < 0) ? -digit : digit;
+        return num < 0 ? -digit : digit;
     }
     return 0;
 }
 const states = {
-    "arizona": "AZ",
-    "alabama": "AL",
-    "alaska": "AK",
-    "arkansas": "AR",
-    "california": "CA",
-    "colorado": "CO",
-    "connecticut": "CT",
+    arizona: "AZ",
+    alabama: "AL",
+    alaska: "AK",
+    arkansas: "AR",
+    california: "CA",
+    colorado: "CO",
+    connecticut: "CT",
     "district of columbia": "DC",
-    "delaware": "DE",
-    "florida": "FL",
-    "georgia": "GA",
-    "hawaii": "HI",
-    "idaho": "ID",
-    "illinois": "IL",
-    "indiana": "IN",
-    "iowa": "IA",
-    "kansas": "KS",
-    "kentucky": "KY",
-    "louisiana": "LA",
-    "maine": "ME",
-    "maryland": "MD",
-    "massachusetts": "MA",
-    "michigan": "MI",
-    "minnesota": "MN",
-    "mississippi": "MS",
-    "missouri": "MO",
-    "montana": "MT",
-    "nebraska": "NE",
-    "nevada": "NV",
+    delaware: "DE",
+    florida: "FL",
+    georgia: "GA",
+    hawaii: "HI",
+    idaho: "ID",
+    illinois: "IL",
+    indiana: "IN",
+    iowa: "IA",
+    kansas: "KS",
+    kentucky: "KY",
+    louisiana: "LA",
+    maine: "ME",
+    maryland: "MD",
+    massachusetts: "MA",
+    michigan: "MI",
+    minnesota: "MN",
+    mississippi: "MS",
+    missouri: "MO",
+    montana: "MT",
+    nebraska: "NE",
+    nevada: "NV",
     "new hampshire": "NH",
     "new jersey": "NJ",
     "new mexico": "NM",
     "new york": "NY",
     "north carolina": "NC",
     "north dakota": "ND",
-    "ohio": "OH",
-    "oklahoma": "OK",
-    "oregon": "OR",
-    "pennsylvania": "PA",
+    ohio: "OH",
+    oklahoma: "OK",
+    oregon: "OR",
+    pennsylvania: "PA",
     "rhode island": "RI",
     "south carolina": "SC",
     "south dakota": "SD",
-    "tennessee": "TN",
-    "texas": "TX",
-    "utah": "UT",
-    "vermont": "VT",
-    "virginia": "VA",
-    "washington": "WA",
+    tennessee: "TN",
+    texas: "TX",
+    utah: "UT",
+    vermont: "VT",
+    virginia: "VA",
+    washington: "WA",
     "west virginia": "WV",
-    "wisconsin": "WI",
-    "wyoming": "WY",
+    wisconsin: "WI",
+    wyoming: "WY",
     "american samoa": "AS",
-    "guam": "GU",
+    guam: "GU",
     "northern mariana islands": "MP",
     "puerto rico": "PR",
     "us virgin islands": "VI",
-    "us minor outlying islands": "UM"
+    "us minor outlying islands": "UM",
 };
 function stateNameToAbbreviation(name) {
-    let a = name.trim().replace(/[^\w ]/g, "").toLowerCase(); //Trim, remove all non-word characters with the exception of spaces, and convert to lowercase
+    let a = name
+        .trim()
+        .replace(/[^\w ]/g, "")
+        .toLowerCase(); //Trim, remove all non-word characters with the exception of spaces, and convert to lowercase
     if (states[a] !== undefined)
         return states[a];
     else
@@ -522,18 +526,23 @@ function stateNameToAbbreviation(name) {
 }
 // ------------------------------------------------------ NAVBAR METHODS
 export function updateNavbarText(lat, lon) {
-    const container = document.getElementById('navbarForLocationDisplay');
+    const container = document.getElementById("navbarForLocationDisplay");
     // Check if container is null
     if (!container) {
         console.error("Container element not found");
         return Promise.reject("Container element not found");
     }
-    container.innerHTML = '';
+    container.innerHTML = "";
     return new Promise((resolve, reject) => {
         try {
-            fetch('https://api.openweathermap.org/geo/1.0/reverse?lat=' + lat + '&lon=' + lon + '&appid=' + key)
-                .then(resp => resp.json()) // Convert response to json
-                .then(data => {
+            fetch("https://api.openweathermap.org/geo/1.0/reverse?lat=" +
+                lat +
+                "&lon=" +
+                lon +
+                "&appid=" +
+                key)
+                .then((resp) => resp.json()) // Convert response to json
+                .then((data) => {
                 var _a, _b;
                 city = (_a = data[0]) === null || _a === void 0 ? void 0 : _a.name; // Use optional chaining to access 'name' property safely
                 let state = (_b = data[0]) === null || _b === void 0 ? void 0 : _b.state;
@@ -544,25 +553,25 @@ export function updateNavbarText(lat, lon) {
                 container.innerHTML += content;
                 resolve(city); // Resolve the promise with the city name
             })
-                .catch(error => {
+                .catch((error) => {
                 console.error(error);
-                reject(error); // Reject the promise if there's an error
+                reject(error);
             });
         }
         catch (error) {
             console.error(error);
-            reject(error); // Reject the promise if there's an error
+            reject(error);
         }
     });
 }
 // Call updateNavbarText first to fetch the city name, then call insertCurrentWeather
 function getWeatherAndInsertCurrentWeather(lat, lon) {
     updateNavbarText(lat, lon)
-        .then(_ => {
+        .then((_) => {
         // Fetch weather data and insert current weather using the retrieved city name
         getWeather(lat, lon);
     })
-        .catch(error => {
+        .catch((error) => {
         console.error(error);
     });
 }
