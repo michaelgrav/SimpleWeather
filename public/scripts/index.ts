@@ -26,7 +26,6 @@ function askBrowserForLocation() {
     update navbar > get current weather > get future weather
 */
 export function updatePage(position: GeolocationPosition) {
-  console.log(position);
   getWeatherAndInsertCurrentWeather(
     position.coords.latitude,
     position.coords.longitude
