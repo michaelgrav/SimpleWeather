@@ -779,11 +779,11 @@ export function updateNavbarText(lat: number, lon: number) {
             })  
             .catch(error => {
                 console.error(error);
-                reject(error); // Reject the promise if there's an error
+                reject(error);
             });
         } catch(error) {
             console.error(error);
-            reject(error); // Reject the promise if there's an error
+            reject(error);
         }
     });
 }
