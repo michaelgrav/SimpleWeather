@@ -116,7 +116,6 @@ function insertCurrentWeather(data: CurrentWeatherData): undefined {
     else 
         mainWeatherConditions = `☂️ Current Conditions: ${mainWeatherConditions} (more specifically, ${detailedWeatherConditions})`;
     
-    const sunSetTime = formatAMPM(new Date(data.sunset * 1000));
     const emojiID = data.weather[0].id === 800 ? 800 : firstDigit(data.weather[0].id);
 
     let content = `
@@ -421,31 +420,53 @@ function insertFutureWeather(data: HourlyWeatherArray, dataDaily: DailyWeatherDa
     createFutureWeatherContainers(dataDaily);
 
     let sunsetRowInserted = false;
+    const dayEntries = new Set();
 
-    var dayEnteries = new Set();
+    const kelvinToFahrenheit = (kelvin: number) => Math.round(((kelvin - 273.15) * 1.8) + 32);
+    const popToPercentage = (pop: number) => (pop * 100).toFixed(0);
 
-    data.shift();
+    const appendContent = (containerId: string, content: string) => {
+        const container = document.getElementById(containerId);
+        if (!container) {
+            console.error(`${containerId} container not found`);
+            return;
+        }
+        container.innerHTML += content;
+    };
+
+
+    const addSunsetRowIfNeeded = (date: Date, dateString: string) => {
+        if (date > sunsetTime && !sunsetRowInserted) {
+            const sunsetRow = `
+                <tr class="golden">
+                    <td>${formatAMPM(sunsetTime)}</td>
+                    <td>Sunset 🌇</td>
+                    <td></td><td></td><td></td><td></td>
+                </tr>
+            `;
+            appendContent(dateString + "-table-body", sunsetRow);
+            sunsetRowInserted = true;
+        }
+    };
+
+    data.shift(); // Remove the first entry
 
     data.forEach(forecast => {
-        // Actual current temp
-        var fahrenheit = Math.round(((forecast.temp - 273.15) * 1.8) + 32);
-        var fahrenheitFeelLike = Math.round(((forecast.feels_like - 273.15) * 1.8) + 32);
-
-        var date = new Date(forecast.dt * 1000);
-        var dateString = date.toDateString();
-        var time = formatAMPM(date);
-
-        var currDate = new Date();
-        var currDateString = currDate.toDateString();
+        const date = new Date(forecast.dt * 1000);
+        const dateString = date.toDateString();
+        const time = formatAMPM(date);
+        const currDateString = new Date().toDateString();
+        const tomorrow = new Date(new Date().getTime() + (24 * 60 * 60 * 1000)).toDateString();
         let dateText = "";
 
-        const tomorrow = new Date(new Date().getTime() + (24 * 60 * 60 * 1000));
-
-        const container = document.getElementById(dateString + "-day-summary-card");
+        const fahrenheit = kelvinToFahrenheit(forecast.temp);
+        const fahrenheitFeelLike = kelvinToFahrenheit(forecast.feels_like);
+        const detailedForecastText = forecast.weather[0].description === "clear sky" ? "clear skies" : forecast.weather[0].description;
+        const rainChance = popToPercentage(forecast.pop);
 
         // Date is today
         if(currDateString == dateString) {
-            dayEnteries.add(dateString);
+            dayEntries.add(dateString);
             dateText = "Today"
 
             // Check if the current time is after sunset
@@ -471,68 +492,37 @@ function insertFutureWeather(data: HourlyWeatherArray, dataDaily: DailyWeatherDa
             }
         }
 
-        // Date is tomorrow
-        else if (tomorrow.toDateString() == dateString) {
-            dayEnteries.add(dateString);
-            dateText = "Tomorrow"
-
-            if(!dayEnteries.has(dateText)) {
-                dayEnteries.add(dateText);
-
-
-                var daySummary = ``
-                // Add the summary card for that day
-                dataDaily.forEach(dayEntry => {
-                    var dayDate = new Date(dayEntry.dt * 1000).toDateString();
-                    if(dayDate == dateString) {
-                        daySummary = futureWeatherCard(dayEntry, dayDate)
-                    }
-                });
-
-                if (!container) {
-                    console.error('day-summary-card container not found');
-                    return;
-                }
-                container.innerHTML += daySummary;
-            }
+        // Handling "Today"
+        if (currDateString === dateString) {
+            dayEntries.add(dateString);
+            dateText = "Today";
+            addSunsetRowIfNeeded(date, dateString);
         }
-
-        // Date is sometime past tomorrow
+        // Handling "Tomorrow"
+        else if (tomorrow === dateString) {
+            dayEntries.add(dateString);
+            dateText = "Tomorrow";
+        }
+        // Handling "Future"
         else {
-            dateText = dateString
-            if(!dayEnteries.has(dateText)) {
-                dayEnteries.add(dateText)
-
-                var daySummary = ``
-                // Add the summary card for that day
-                dataDaily.forEach(dayEntry => {
-                    var dayDate = new Date(dayEntry.dt * 1000).toDateString();
-                    if(dayDate == dateString) {
-                        daySummary = futureWeatherCard(dayEntry, dayDate)
-                    }
-                });
-
-                if (!container) {
-                    console.error('day-summary-card container not found');
-                    return;
-                }
-                container.innerHTML += daySummary;
+            dateText = dateString;
+            if (!dayEntries.has(dateText)) {
+                dayEntries.add(dateText);
             }
         }
 
-        var detailedForecastText = "";
-        if (forecast.weather[0].description == "clear sky") detailedForecastText = "clear skies"
-        else detailedForecastText = forecast.weather[0].description
-
-        var rainChance = (forecast.pop * 100).toFixed(0);
-
-        var emojiID = 800;
-        if (forecast.weather[0].id !== 800) {
-            emojiID = firstDigit(forecast.weather[0].id);
+        // Insert daily summary card if needed
+        if (!dayEntries.has(dateText)) {
+            dataDaily.forEach(dayEntry => {
+                const dayDate = new Date(dayEntry.dt * 1000).toDateString();
+                if (dayDate === dateString) {
+                    const daySummary = futureWeatherCard(dayEntry, dayDate);
+                    appendContent(dateString + "-day-summary-card", daySummary);
+                }
+            });
         }
 
-        const hourlyContainer = document.getElementById(dateString+"-table-body");
-
+        // Insert hourly forecast
         const content = `
             <tr>
                 <td>${time}</td>
@@ -542,34 +532,21 @@ function insertFutureWeather(data: HourlyWeatherArray, dataDaily: DailyWeatherDa
                 <td>${rainChance}%</td>
                 <td>${forecast.clouds}%</td>
             </tr>
-          `;
-    
-        if (!hourlyContainer) {
-            console.error('hourlyContainer container not found');
-            return;
-        }
-        hourlyContainer.innerHTML += content;
+        `;
+        appendContent(dateString + "-table-body", content);
     });
 
-    // Insert the rest of the future days
+    // Insert the rest of the future days that were not processed
     dataDaily.forEach(dayEntry => {
-        var dayDate = new Date(dayEntry.dt * 1000).toDateString();
-        if(!dayEnteries.has(dayDate)) {
-            const container = document.getElementById(dayDate + "-day-summary-card");
-            var daySummary = futureWeatherCard(dayEntry, dayDate)
-            if (!container) {
-                console.error('day-summary-card container not found');
-                return;
-            }
-            container.innerHTML += daySummary;
+        const dayDate = new Date(dayEntry.dt * 1000).toDateString();
+        if (!dayEntries.has(dayDate)) {
+            const daySummary = futureWeatherCard(dayEntry, dayDate);
+            appendContent(dayDate + "-day-summary-card", daySummary);
 
-            // Clean up the days that shouldn't have tables (no hourly results)
-            const element = document.getElementById(dayDate+"-entire-table");
-            if (!element) {
-                console.error('entire-table container not found');
-                return;
+            const element = document.getElementById(dayDate + "-entire-table");
+            if (element) {
+                element.remove();
             }
-            element.remove();
         }
     });
 }
